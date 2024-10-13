@@ -69,9 +69,10 @@ class Encoding extends Enum {
    */
   public static function for(string $model): self {
     static $models= [
-      '/^o1/'      => 'o200k_base',
-      '/^gpt-4o/'  => 'o200k_base',
-      '/^gpt-4/'   => 'cl100k_base',
+      '/^o1/'       => 'o200k_base',
+      '/^omni/'     => 'o200k_base',
+      '/^gpt-4o/'   => 'o200k_base',
+      '/^gpt-4/'    => 'cl100k_base',
       '/^gpt-3.?5/' => 'cl100k_base',
     ];
 

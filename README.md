@@ -12,18 +12,18 @@ This library implements OpenAI APIs.
 
 TikToken
 --------
-Encodes text to tokens. Download the [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) and [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) vocabularies first!
+Encodes text to tokens. Download the vocabularies [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) (used for GPT-3.5 and GPT-4.0) and [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) (used for Omni and O1) first!
 
 ```php
 use com\openai\{Encoding, TikTokenFilesIn};
 
 $source= new TikTokenFilesIn('.');
 
-// GPT 3.5, 4.0 => [9906, 4435, 0]
+// By name => [9906, 4435, 0]
 $tokens= Encoding::named('cl100k_base')->load($source)->encode('Hello World!');
 
-// GPT o1, omni => [13225, 5922, 0]
-$tokens= Encoding::named('o200k_base')->load($source)->encode('Hello World!');
+// By model => [13225, 5922, 0]
+$tokens= Encoding::for('omni')->load($source)->encode('Hello World!');
 ```
 
 See also
