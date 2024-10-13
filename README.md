@@ -28,14 +28,44 @@ $tokens= Encoding::for('omni')->load($source)->encode('Hello World!');
 
 Completions
 -----------
-*Coming soon*
+Using the REST API, see https://platform.openai.com/docs/api-reference/making-requests
 
-Embeddings
-----------
-*Coming soon*
+```php
+use util\cmd\Console;
+use com\openai\rest\OpenAIEndpoint;
+
+$ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
+$payload= [
+  'model'    => 'gpt-4o-mini',
+  'messages' => [['role' => 'user', 'content' => $prompt]],
+];
+
+Console::writeLine($ai->api('/chat/completions')->invoke($payload));
+```
 
 Streaming
 ---------
+The REST API can use server-sent events to stream responses, see https://platform.openai.com/docs/api-reference/streaming
+
+```php
+use util\cmd\Console;
+use com\openai\rest\OpenAIEndpoint;
+
+$ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
+$payload= [
+  'model'    => 'gpt-4o-mini',
+  'messages' => [['role' => 'user', 'content' => $prompt]],
+];
+
+$stream= $ai->api('/chat/completions')->stream($payload);
+foreach ($stream->deltas('content') as $delta) {
+  Console::write($delta);
+}
+Console::writeLine();
+```
+
+Embeddings
+----------
 *Coming soon*
 
 Functions
