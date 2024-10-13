@@ -54,3 +54,9 @@ jobs:
 
     - name: Run test suite
       run: sh xp-run xp.test.Runner -r Dots src/test/php
+
+    - name: Run integration tests
+      run: >
+        curl -O 'https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken' &&
+        curl -O 'https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken' &&
+        sh xp-run xp.test.Runner src/it/php --folder=.
