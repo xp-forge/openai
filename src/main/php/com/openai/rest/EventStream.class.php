@@ -7,7 +7,12 @@ use util\Objects;
 /**
  * OpenAI API event stream
  *
+ * Note: While these event streams are based on server-sent events, they do not
+ * utilize their full extent - there are no event types, IDs or multiline data.
+ * This implementation can be a bit simpler because of that.
+ *
  * @see   https://platform.openai.com/docs/guides/production-best-practices/streaming
+ * @see   https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events
  * @test  com.openai.unittest.EventStreamTest
  */
 class EventStream {
