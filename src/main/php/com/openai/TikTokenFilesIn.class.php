@@ -10,7 +10,7 @@ use lang\IllegalArgumentException;
  * @see   https://openaipublic.blob.core.windows.net/encodings/p50k_base.tiktoken - Curie, Code
  * @see   https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken - GPT 3.5 / 4.0 
  * @see   https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken - o1, Omni
- * @test  com.openai.unittest.FromTikTokenTest
+ * @test  com.openai.unittest.TikTokenFilesInTest
  */
 class TikTokenFilesIn extends Source {
   private $folder;

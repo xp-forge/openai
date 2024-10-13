@@ -1,8 +1,14 @@
 <?php namespace com\openai;
 
-use lang\Enum;
+use lang\{Enum, IllegalArgumentException};
 
-/** @see https://github.com/openai/tiktoken/blob/main/tiktoken_ext/openai_public.py */
+/**
+ * Encoding enumeration, supporting `r50k_base`, `p50k_base`, `cl100k_base` and
+ * `o200k_base`.
+ * 
+ * @see   https://github.com/openai/tiktoken/blob/main/tiktoken_ext/openai_public.py
+ * @test  com.openai.unittest.EncodingTest
+ */
 class Encoding extends Enum {
   const ENDOFTEXT  = '<|endoftext|>';
   const FIM_PREFIX = '<|fim_prefix|>';
@@ -54,5 +60,25 @@ class Encoding extends Enum {
    */
   public static function named(string $name): self {
     return parent::valueOf(self::class, $name);
+  }
+
+  /**
+   * Returns an encoding for a given model
+   *
+   * @throws  lang.IllegalArgumentException
+   */
+  public static function for(string $model): self {
+    static $models= [
+      '/^o1/'      => 'o200k_base',
+      '/^gpt-4o/'  => 'o200k_base',
+      '/^gpt-4/'   => 'cl100k_base',
+      '/^gpt-3.?5/' => 'cl100k_base',
+    ];
+
+    foreach ($models as $pattern => $name) {
+      if (preg_match($pattern, $model)) return self::named($name);
+    }
+
+    throw new IllegalArgumentException('Unknown model "'.$model.'"');
   }
 }

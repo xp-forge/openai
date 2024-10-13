@@ -12,7 +12,7 @@ This library implements OpenAI APIs.
 
 TikToken
 --------
-Encoding text to tokens. Download the [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) and [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) vocabularies first!
+Encodes text to tokens. Download the [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) and [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) vocabularies first!
 
 ```php
 use com\openai\{Encoding, TikTokenFilesIn};
