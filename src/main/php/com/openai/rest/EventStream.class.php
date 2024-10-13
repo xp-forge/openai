@@ -91,7 +91,7 @@ class EventStream {
 
     $r= new StringReader($this->stream);
     while (null !== ($line= $r->readLine())) {
-      if (!str_starts_with($line, 'data: ')) continue;
+      if (0 !== strncmp($line, 'data: ', 5)) continue;
       // echo "\n<<< $line\n";
 
       // Last chunk is "data: [DONE]"
