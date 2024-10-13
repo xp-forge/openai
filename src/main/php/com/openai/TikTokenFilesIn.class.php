@@ -41,9 +41,10 @@ class TikTokenFilesIn extends Source {
       if ($file->exists()) {
         $file->open(File::READ);
         try {
-          while (false !== ($line= $file->gets(2048))) {
-            sscanf($line, '%s %d', $encoded, $rank);
-            yield base64_decode($encoded) => $rank;
+          $handle= $file->getHandle();
+          while (false !== ($line= fgets($handle, 2048))) {
+            [$encoded, $rank]= explode(' ', $line);
+            yield base64_decode($encoded) => (int)$rank;
           }
         } finally {
           $file->close();
