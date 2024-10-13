@@ -55,8 +55,20 @@ jobs:
     - name: Run test suite
       run: sh xp-run xp.test.Runner -r Dots src/test/php
 
-    - name: Run integration tests
+    - name: Cache Tiktoken files
+      id: cache-tiktoken
+      uses: actions/cache@v3
+      with:
+        path: tiktoken
+        key: ${{ runner.os }}-tiktoken
+
+    - name: Download Tiktoken files
+      if: steps.cache-tiktoken.outputs.cache-hit != 'true'
       run: >
+        mkdir -p tiktoken &&
+        cd tiktoken &&
         curl -O 'https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken' &&
-        curl -O 'https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken' &&
-        sh xp-run xp.test.Runner src/it/php --folder=.
+        curl -O 'https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken'
+
+    - name: Run integration tests
+      run: sh xp-run xp.test.Runner src/it/php --folder=tiktoken
