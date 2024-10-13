@@ -26,6 +26,26 @@ $tokens= Encoding::named('cl100k_base')->load($source)->encode('Hello World!');
 $tokens= Encoding::for('omni')->load($source)->encode('Hello World!');
 ```
 
+Completions
+-----------
+*Coming soon*
+
+Embeddings
+----------
+*Coming soon*
+
+Streaming
+---------
+*Coming soon*
+
+Azure OpenAI
+------------
+*Coming soon*
+
+Realtime API
+------------
+*Coming soon*
+
 See also
 --------
 * https://github.com/openai/tiktoken/
