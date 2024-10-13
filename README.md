@@ -38,6 +38,10 @@ Streaming
 ---------
 *Coming soon*
 
+Functions
+---------
+*Coming soon*
+
 Azure OpenAI
 ------------
 *Coming soon*
