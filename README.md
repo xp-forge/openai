@@ -211,3 +211,4 @@ Realtime API
 See also
 --------
 * https://github.com/openai/tiktoken/
+* https://github.com/openai/openai-python
