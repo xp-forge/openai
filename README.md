@@ -142,19 +142,19 @@ if ('tool_calls' === ($result['choices'][0]['finish_reason'] ?? null)) {
   
   foreach ($result['choices'][0]['message']['tool_calls'] as $call) {
     try {
-      $result= $functions->invoke(
+      $return= $functions->invoke(
         $call['function']['name'],
         json_decode($call['function']['arguments'], true)
       );
     } catch (Throwable $t) {
       $t->printStackTrace();
-      $result= ['error' => $t->compoundMessage()];
+      $return= ['error' => $t->compoundMessage()];
     }
 
     $payload['messages'][]= [
       'role'         => 'tool',
       'tool_call_id' => $call['id'],
-      'content'      => json_encode($result),
+      'content'      => json_encode($return),
     ];
   }
 
