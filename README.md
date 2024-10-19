@@ -186,7 +186,20 @@ Console::writeLine($result);
 
 Azure OpenAI
 ------------
-*Coming soon*
+These endpoints differ slightly in how they are invoked, which is handled by the *AzureAI* implementation. See https://learn.microsoft.com/en-us/azure/ai-services/openai/overview
+
+```php
+use com\openai\rest\AzureAIEndpoint;
+use util\cmd\Console;
+
+$ai= new AzureAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@example.openai.azure.com/openai/deployments/mini', '2024-02-01');
+$payload= [
+  'model'    => 'gpt-4o-mini',
+  'messages' => [['role' => 'user', 'content' => $prompt]],
+];
+
+Console::writeLine($ai->api('/chat/completions')->invoke($payload));
+```
 
 Realtime API
 ------------
