@@ -193,7 +193,7 @@ use com\openai\rest\AzureAIEndpoint;
 use util\cmd\Console;
 
 $ai= new AzureAIEndpoint(
-  'https://'.getenv('OPENAI_API_KEY').'@example.openai.azure.com/openai/deployments/mini',
+  'https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/deployments/mini',
   '2024-02-01'
 );
 $payload= [
