@@ -105,6 +105,11 @@ class Weather {
 }
 ```
 
+The *Param* annnotation may define a description and a [JSON schema type](https://json-schema.org/understanding-json-schema/reference):
+
+* `#[Param('The name of the city')] $name`
+* `#[Param(type: ['type' => 'string', 'enum' => ['C', 'F']])] $unit`
+
 ### Passing custom functions
 
 Custom functions are registered in a `Functions` instance and passed via *tools* inside the payload.
