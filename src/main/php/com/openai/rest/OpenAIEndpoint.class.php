@@ -1,8 +1,9 @@
 <?php namespace com\openai\rest;
 
+use util\log\Traceable;
 use webservices\rest\Endpoint;
 
-class OpenAIEndpoint {
+class OpenAIEndpoint implements Traceable {
   private $endpoint;
 
   /**
@@ -12,6 +13,15 @@ class OpenAIEndpoint {
    */
   public function __construct($arg) {
     $this->endpoint= $arg instanceof Endpoint ? $arg : new Endpoint($arg);
+  }
+
+  /**
+   * Provides a log category for tracing requests
+   *
+   * @param  ?util.log.LogCategory $cat
+   */
+  public function setTrace($cat) {
+    $this->endpoint->setTrace($cat);
   }
 
   /** Returns an API */
