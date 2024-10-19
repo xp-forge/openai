@@ -1,8 +1,9 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\rest\OpenAIEndpoint;
-use test\{Assert, Test};
-use webservices\rest\TestEndpoint;
+use test\{Assert, Expect, Test};
+use util\log\{LogCategory, BufferedAppender};
+use webservices\rest\{TestEndpoint, UnexpectedStatus};
 
 class OpenAIEndpointTest {
   const URI= 'https://sk-test@api.openai.example.com/v1';
@@ -49,5 +50,11 @@ class OpenAIEndpointTest {
       ['choices' => [['message' => ['role' => 'assistant', 'content' => 'Test']]]],
       $endpoint->api('/chat/completions')->stream(['stream' => true])->result()
     );
+  }
+
+  #[Test, Expect(UnexpectedStatus::class)]
+  public function invoke_non_existant_api() {
+    $endpoint= new OpenAIEndpoint($this->testingEndpoint());
+    $endpoint->api('/non-exisant')->invoke([]);
   }
 }
