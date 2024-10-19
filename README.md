@@ -31,8 +31,8 @@ Completions
 Using the REST API, see https://platform.openai.com/docs/api-reference/making-requests
 
 ```php
-use util\cmd\Console;
 use com\openai\rest\OpenAIEndpoint;
+use util\cmd\Console;
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $payload= [
@@ -48,8 +48,8 @@ Streaming
 The REST API can use server-sent events to stream responses, see https://platform.openai.com/docs/api-reference/streaming
 
 ```php
-use util\cmd\Console;
 use com\openai\rest\OpenAIEndpoint;
+use util\cmd\Console;
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $payload= [
@@ -82,7 +82,85 @@ Console::writeLine($ai->api('/embeddings')->invoke([
 
 Tool calls
 ----------
-*Coming soon*
+There are two types of tools: Built-ins like *file_search* and *code_interpreter* (available [in the assistants API](https://platform.openai.com/docs/assistants/tools)) as well as custom functions, see https://platform.openai.com/docs/guides/function-calling 
+
+### Defining functions
+
+Custom functions map to instance methods in a class:
+
+```php
+use com\openai\tools\Param;
+use webservices\rest\Endpoint;
+
+class Weather {
+  private $endpoint;
+
+  public function __construct(string $base= 'https://wttr.in/') {
+    $this->endpoint= new Endpoint($base);
+  }
+
+  public function in(#[Param] string $city): string {
+    return $this->endpoint->resource('/{0}?0mT', [$city])->get()->content(); 
+  }
+}
+```
+
+### Passing custom functions
+
+Custom functions are registered in a `Functions` instance and passed via *tools* inside the payload.
+
+```php
+use com\openai\rest\OpenAIEndpoint;
+use com\openai\Tools;
+use com\openai\tools\Functions;
+use util\cmd\Console;
+
+$functions= (new Functions())->register('weather', new Weather());
+
+$ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
+$payload= [
+  'model'    => 'gpt-4o-mini',
+  'tools'    => new Tools($functions),
+  'messages' => [['role' => 'user', 'content' => $prompt]],
+];
+```
+
+### Invoking custom functions
+
+If tool calls are requested by the LLM, invoke them and return to next completion cycle. Arguments and return values are encoded as *JSON*. See https://platform.openai.com/docs/guides/function-calling/configuring-parallel-function-calling
+
+```php
+use lang\Throwable;
+
+// ...setup code from above...
+
+complete: $result= $ai->api('/chat/completions')->invoke($payload));
+
+// If tool calls are requested, invoke them and return to next completion cycle
+if ('tool_calls' === ($result['choices'][0]['finish_reason'] ?? null)) {
+  $payload['messages'][]= $result['choices'][0]['message'];
+  
+  foreach ($result['choices'][0]['message']['tool_calls'] as $call) {
+    try {
+      $result= $functions->invoke($call['function']['name'], json_decode($call['function']['arguments'], true));
+    } catch (Throwable $t) {
+      $t->printStackTrace();
+      $result= ['error' => $t->compoundMessage()];
+    }
+
+    $payload['messages'][]= [
+      'role'         => 'tool',
+      'tool_call_id' => $call['id'],
+      'content'      => json_encode($result),
+    ];
+  }
+
+  goto complete;
+}
+
+// Print out final result
+Console::writeLine($result);
+```
 
 Azure OpenAI
 ------------
