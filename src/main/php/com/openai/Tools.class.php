@@ -2,8 +2,8 @@
 
 use Generator;
 use com\openai\tools\{Param, Context};
-use lang\{Type, Reflection, Value, IllegalArgumentException};
 use lang\reflection\TargetException;
+use lang\{Type, Reflection, Value, IllegalArgumentException};
 use util\{Comparison, Objects};
 
 /**
@@ -116,31 +116,34 @@ class Tools implements Value {
   public function invoke(string $call, array $arguments, array $context= []) {
     try {
       sscanf($call, "%[^_]_%[^\r]", $namespace, $name);
-      $methods= $this->methods[$namespace]
-        ?? throw new IllegalArgumentException("Unknown namespace {$namespace}")
-      ;
-      $method= $methods[$name]
-        ?? throw new IllegalArgumentException("Unknown function {$name} in {$namespace}")
-      ;
+      if (null === ($method= $this->methods[$namespace][$name] ?? null)) {
+        throw new IllegalArgumentException(isset($this->methods[$namespace])
+          ? "Unknown function {$name} in {$namespace}"
+          : "Unknown namespace {$namespace}"
+        );
+      }
 
       // Lazily create instance
       list(&$instance, $new)= $this->instances[$namespace];
       $instance??= $new();
 
       $pass= [];
-      foreach ($methods[$name]->parameters() as $param => $reflect) {
+      foreach ($method->parameters() as $param => $reflect) {
         if ($reflect->annotations()->provides(Context::class)) {
           $ptr= &$context[$param];
         } else {
           $ptr= &$arguments[$param];
         }
 
-        $pass[]= $ptr ?? ($reflect->optional()
-          ? $reflect->default()
-          : throw new IllegalArgumentException("Missing argument {$param} for {$call}")
-        );
+        if (isset($ptr)) {
+          $pass[]= $ptr;
+        } else if ($reflect->optional()) {
+          $pass[]= $reflect->default();
+        } else {
+          throw new IllegalArgumentException("Missing argument {$param} for {$call}");
+        }
       }
-      return $methods[$name]->invoke($instance, $pass);
+      return $method->invoke($instance, $pass);
     } catch (TargetException $e) {
       throw $e->getCause();
     }
