@@ -17,6 +17,16 @@ class ToolsTest {
     ]
   ];
 
+  /** For select() test */
+  private function selections(): iterable {
+    yield [[], []];
+    yield [['testing_*'], ['testing_code', 'testing_execute']];
+    yield [['testing_execute'], ['testing_execute']];
+    yield [['testing_execute', 'production_*'], ['testing_execute', 'production_execute']];
+    yield [['testing_nonexistant'], []];
+    yield [['nonexistant_*'], []];
+  }
+
   #[Test]
   public function can_create() {
     new Tools();
@@ -189,14 +199,7 @@ class ToolsTest {
     );
   }
 
-  #[Test, Values([
-    [[], []],
-    [['testing_*'], ['testing_code', 'testing_execute']],
-    [['testing_execute'], ['testing_execute']],
-    [['testing_execute', 'production_*'], ['testing_execute', 'production_execute']],
-    [['testing_nonexistant'], []],
-    [['nonexistant_*'], []],
-  ])]
+  #[Test, Values(from: 'selections')]
   public function select($namespaces, $expected) {
     $fixture= (new Tools())
       ->register('testing', new class() {
@@ -223,12 +226,15 @@ class ToolsTest {
     Assert::equals($expected, $result);
   }
 
-  #[Test, Expect(IllegalArgumentException::class), Values([
-    ['unknown_hello', 'Unknown namespace unknown'],
-    ['testing_unknown', 'Unknown function unknown in testing'],
-  ])]
-  public function invoke_nonexistant($call, $error) {
+  #[Test, Expect(IllegalArgumentException::class)]
+  public function unknown_namespace() {
     $fixture= (new Tools())->with('testing', HelloWorld::class);
-    $fixture->invoke($call, []);
+    $fixture->invoke('unknown_hello', []);
+  }
+
+  #[Test, Expect(IllegalArgumentException::class)]
+  public function unknown_method() {
+    $fixture= (new Tools())->with('testing', HelloWorld::class);
+    $fixture->invoke('testing_unknown', []);
   }
 }
