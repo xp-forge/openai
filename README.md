@@ -80,6 +80,20 @@ Console::writeLine($ai->api('/embeddings')->invoke([
 ));
 ```
 
+Tracing the calls
+-----------------
+REST API calls can be traced with the [logging library](https://github.com/xp-framework/logging):
+
+```php
+use com\openai\rest\OpenAIEndpoint;
+use util\log\Logging;
+
+$ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
+$ai->setTrace(Logging::all()->toConsole());
+
+// ...perform API calls...
+```
+
 Tool calls
 ----------
 There are two types of tools: Built-ins like *file_search* and *code_interpreter* (available [in the assistants API](https://platform.openai.com/docs/assistants/tools)) as well as custom functions, see https://platform.openai.com/docs/guides/function-calling 
