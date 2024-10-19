@@ -1,60 +1,21 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\rest\OpenAIEndpoint;
-use test\{Assert, Expect, Test};
-use util\log\{LogCategory, BufferedAppender};
-use webservices\rest\{TestEndpoint, UnexpectedStatus};
+use test\{Assert, Test};
 
-class OpenAIEndpointTest {
+class OpenAIEndpointTest extends ApiEndpointTest {
   const URI= 'https://sk-test@api.openai.example.com/v1';
 
-  /** Returns a testing API endpoint */
-  private function testingEndpoint(): TestEndpoint {
-    return new TestEndpoint([
-      'POST /chat/completions' => function($call) {
-        if ($call->request()->payload()->value()['stream'] ?? false) {
-          $headers= ['Content-Type' => 'text/event-stream'];
-          $payload= implode("\n", [
-            'data: {"choices":[{"delta":{"role":"assistant"}}]}',
-            'data: {"choices":[{"delta":{"content":"Test"}}]}',
-            'data: [DONE]',
-          ]);
-        } else {
-          $headers= ['Content-Type' => 'application/json'];
-          $payload= '{"choices":[{"message":{"role":"assistant","content":"Test"}}]}';
-        }
-
-        return $call->respond(200, 'OK', $headers, $payload);
-      }
-    ]);
-  }
+  /** @return com.openai.rest.ApiEndpoint */
+  protected function fixture(... $args) { return new OpenAIEndpoint(...$args); }
 
   #[Test]
   public function can_create() {
-    new OpenAIEndpoint(self::URI);
+    $this->fixture(self::URI);
   }
 
   #[Test]
-  public function invoke() {
-    $endpoint= new OpenAIEndpoint($this->testingEndpoint());
-    Assert::equals(
-      ['choices' => [['message' => ['role' => 'assistant', 'content' => 'Test']]]],
-      $endpoint->api('/chat/completions')->invoke(['stream' => false])
-    );
-  }
-
-  #[Test]
-  public function stream() {
-    $endpoint= new OpenAIEndpoint($this->testingEndpoint());
-    Assert::equals(
-      ['choices' => [['message' => ['role' => 'assistant', 'content' => 'Test']]]],
-      $endpoint->api('/chat/completions')->stream(['stream' => true])->result()
-    );
-  }
-
-  #[Test, Expect(UnexpectedStatus::class)]
-  public function invoke_non_existant_api() {
-    $endpoint= new OpenAIEndpoint($this->testingEndpoint());
-    $endpoint->api('/non-exisant')->invoke([]);
+  public function authorization_header_set() {
+    Assert::equals('Bearer sk-test', $this->fixture(self::URI)->headers()['Authorization']);
   }
 }
