@@ -80,8 +80,8 @@ Console::writeLine($ai->api('/embeddings')->invoke([
 ));
 ```
 
-Functions
----------
+Tool calls
+----------
 *Coming soon*
 
 Azure OpenAI
