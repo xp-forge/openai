@@ -66,7 +66,19 @@ Console::writeLine();
 
 Embeddings
 ----------
-*Coming soon*
+To create an embedding for a given text, use https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
+
+```php
+use util\cmd\Console;
+use com\openai\rest\OpenAIEndpoint;
+
+$ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
+
+Console::writeLine($ai->api('/embeddings')->invoke([
+  'input' => $text,
+  'model' => 'text-embedding-3-small'],
+));
+```
 
 Functions
 ---------
