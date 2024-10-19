@@ -1,6 +1,5 @@
 <?php namespace com\openai\rest;
 
-use util\log\Traceable;
 use webservices\rest\Endpoint;
 
 /**
@@ -8,8 +7,7 @@ use webservices\rest\Endpoint;
  *
  * @test com.openai.unittest.OpenAIEndpointTest
  */
-class OpenAIEndpoint implements Traceable {
-  private $endpoint;
+class OpenAIEndpoint extends ApiEndpoint {
 
   /**
    * Creates a new OpenAI endpoint
@@ -17,16 +15,7 @@ class OpenAIEndpoint implements Traceable {
    * @param  string|util.URI|webservices.rest.Endpoint
    */
   public function __construct($arg) {
-    $this->endpoint= $arg instanceof Endpoint ? $arg : new Endpoint($arg);
-  }
-
-  /**
-   * Provides a log category for tracing requests
-   *
-   * @param  ?util.log.LogCategory $cat
-   */
-  public function setTrace($cat) {
-    $this->endpoint->setTrace($cat);
+    parent::__construct($arg instanceof Endpoint ? $arg : new Endpoint($arg));
   }
 
   /** Returns an API */
