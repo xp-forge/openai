@@ -1,11 +1,10 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\Tools;
-use com\openai\tools\{Param, Context};
+use com\openai\tools\{Functions, Param, Context};
 use lang\{XPClass, IllegalArgumentException};
 use test\{Assert, Expect, Test, Values};
 
-class ToolsTest {
+class FunctionsTest {
   const HELLO_WORLD= [
     'testing_hello' => [
       'description' => 'Hello World',
@@ -29,14 +28,14 @@ class ToolsTest {
 
   #[Test]
   public function can_create() {
-    new Tools();
+    new Functions();
   }
 
   #[Test]
   public function register() {
     Assert::equals(
       self::HELLO_WORLD,
-      iterator_to_array((new Tools())->register('testing', new HelloWorld())->schema()),
+      iterator_to_array((new Functions())->register('testing', new HelloWorld())->schema()),
     );
   }
 
@@ -44,7 +43,7 @@ class ToolsTest {
   public function with_classname() {
     Assert::equals(
       self::HELLO_WORLD,
-      iterator_to_array((new Tools())->with('testing', HelloWorld::class)->schema()),
+      iterator_to_array((new Functions())->with('testing', HelloWorld::class)->schema()),
     );
   }
 
@@ -52,13 +51,13 @@ class ToolsTest {
   public function with_xpclass() {
     Assert::equals(
       self::HELLO_WORLD,
-      iterator_to_array((new Tools())->with('testing', XPClass::forName('com.openai.unittest.HelloWorld'))->schema()),
+      iterator_to_array((new Functions())->with('testing', XPClass::forName('com.openai.unittest.HelloWorld'))->schema()),
     );
   }
 
   #[Test]
   public function required_parameter() {
-    $fixture= (new Tools())->register('testing', new class() {
+    $fixture= (new Functions())->register('testing', new class() {
       private $hello= 'Hello';
 
       /** Greets the user */
@@ -81,7 +80,7 @@ class ToolsTest {
 
   #[Test]
   public function optional_parameter() {
-    $fixture= (new Tools())->register('testing', new class() {
+    $fixture= (new Functions())->register('testing', new class() {
 
       /** Greets the user */
       public function greet($name= 'World') {
@@ -103,7 +102,7 @@ class ToolsTest {
 
   #[Test]
   public function context_parameter() {
-    $fixture= (new Tools())->register('testing', new class() {
+    $fixture= (new Functions())->register('testing', new class() {
 
       /** Greets the user */
       public function greet(
@@ -126,7 +125,7 @@ class ToolsTest {
 
   #[Test]
   public function annotated_parameter() {
-    $fixture= (new Tools())->register('testing', new class() {
+    $fixture= (new Functions())->register('testing', new class() {
 
       /** Greets the user */
       public function greet(
@@ -151,7 +150,7 @@ class ToolsTest {
 
   #[Test]
   public function annotated_parameter_with_enum() {
-    $fixture= (new Tools())->register('testing', new class() {
+    $fixture= (new Functions())->register('testing', new class() {
 
       /** Returns 100 degrees in the given unit */
       public function temperature(
@@ -176,7 +175,7 @@ class ToolsTest {
 
   #[Test]
   public function annotated_parameter_with_type() {
-    $fixture= (new Tools())->register('testing', new class() {
+    $fixture= (new Functions())->register('testing', new class() {
 
       /** Returns top X */
       public function top(
@@ -201,7 +200,7 @@ class ToolsTest {
 
   #[Test, Values(from: 'selections')]
   public function select($namespaces, $expected) {
-    $fixture= (new Tools())
+    $fixture= (new Functions())
       ->register('testing', new class() {
         public function code() { return 'coded'; }
         public function execute() { return 'simulated'; }
@@ -220,7 +219,7 @@ class ToolsTest {
 
   #[Test, Values([[[], 'Hello World'], [['name' => 'Test'], 'Hello Test']])]
   public function invoke($arguments, $expected) {
-    $fixture= (new Tools())->with('testing', HelloWorld::class);
+    $fixture= (new Functions())->with('testing', HelloWorld::class);
     $result= $fixture->invoke('testing_hello', $arguments);
 
     Assert::equals($expected, $result);
@@ -228,13 +227,13 @@ class ToolsTest {
 
   #[Test, Expect(IllegalArgumentException::class)]
   public function unknown_namespace() {
-    $fixture= (new Tools())->with('testing', HelloWorld::class);
+    $fixture= (new Functions())->with('testing', HelloWorld::class);
     $fixture->invoke('unknown_hello', []);
   }
 
   #[Test, Expect(IllegalArgumentException::class)]
   public function unknown_method() {
-    $fixture= (new Tools())->with('testing', HelloWorld::class);
+    $fixture= (new Functions())->with('testing', HelloWorld::class);
     $fixture->invoke('testing_unknown', []);
   }
 }

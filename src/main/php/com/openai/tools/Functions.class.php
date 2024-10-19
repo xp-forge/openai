@@ -1,17 +1,16 @@
-<?php namespace com\openai;
+<?php namespace com\openai\tools;
 
-use Generator;
 use com\openai\tools\{Param, Context};
 use lang\reflection\TargetException;
 use lang\{Type, Reflection, Value, IllegalArgumentException};
 use util\{Comparison, Objects};
 
 /**
- * Tool calling
+ * Function calling
  *
- * @test com.openai.unittest.ToolsTest
+ * @test com.openai.unittest.FunctionsTest
  */
-class Tools implements Value {
+class Functions implements Value {
   use Comparison;
 
   private $instances= [];
