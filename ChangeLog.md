@@ -3,6 +3,8 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.1.0 / 2024-10-19
+
 * Added support for optional organization and project identifiers, see
   https://platform.openai.com/docs/api-reference/authentication
   (@thekid)
