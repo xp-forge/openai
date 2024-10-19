@@ -4,7 +4,6 @@ use test\{Assert, Expect, Test};
 use webservices\rest\{TestEndpoint, UnexpectedStatus};
 
 abstract class ApiEndpointTest {
-  const URI= 'https://1e51...@test.openai.azure.com/openai/deployments/omni';
 
   /** @return com.openai.rest.ApiEndpoint */
   protected abstract function fixture(... $args);
