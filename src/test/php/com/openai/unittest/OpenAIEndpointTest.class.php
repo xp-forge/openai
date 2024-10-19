@@ -7,7 +7,7 @@ class OpenAIEndpointTest extends ApiEndpointTest {
   const URI= 'https://sk-test@api.openai.example.com/v1';
 
   /** @return com.openai.rest.ApiEndpoint */
-  protected function fixture($endpoint) { return new OpenAIEndpoint($endpoint); }
+  protected function fixture(... $args) { return new OpenAIEndpoint(...$args); }
 
   #[Test]
   public function can_create() {

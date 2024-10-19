@@ -7,7 +7,7 @@ abstract class ApiEndpointTest {
   const URI= 'https://1e51...@test.openai.azure.com/openai/deployments/omni';
 
   /** @return com.openai.rest.ApiEndpoint */
-  protected abstract function fixture($endpoint);
+  protected abstract function fixture(... $args);
 
   /** Returns a testing API endpoint */
   private function testingEndpoint(): TestEndpoint {

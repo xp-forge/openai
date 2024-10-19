@@ -7,11 +7,16 @@ class AzureAIEndpointTest extends ApiEndpointTest {
   const URI= 'https://1e51...@test.openai.azure.com/openai/deployments/omni';
 
   /** @return com.openai.rest.ApiEndpoint */
-  protected function fixture($endpoint) { return new AzureAIEndpoint($endpoint); }
+  protected function fixture(... $args) { return new AzureAIEndpoint(...$args); }
 
   #[Test]
   public function can_create() {
     $this->fixture(self::URI);
+  }
+
+  #[Test]
+  public function version() {
+    Assert::equals('2024-02-01', $this->fixture(self::URI, '2024-02-01')->version);
   }
 
   #[Test]
