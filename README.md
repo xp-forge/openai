@@ -8,7 +8,7 @@ OpenAI APIs for XP
 [![Supports PHP 8.0+](https://raw.githubusercontent.com/xp-framework/web/master/static/php-8_0plus.svg)](http://php.net/)
 [![Latest Stable Version](https://poser.pugx.org/xp-forge/openai/version.svg)](https://packagist.org/packages/xp-forge/openai)
 
-This library implements OpenAI APIs.
+This library implements OpenAI APIs with a low-level abstraction approach.
 
 TikToken
 --------

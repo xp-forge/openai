@@ -3,6 +3,7 @@
 use util\log\Traceable;
 use webservices\rest\Endpoint;
 
+/** @test com.openai.unittest.OpenAIEndpointTest */
 class OpenAIEndpoint implements Traceable {
   private $endpoint;
 
