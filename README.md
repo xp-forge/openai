@@ -113,7 +113,6 @@ Custom functions are registered in a `Functions` instance and passed via *tools*
 use com\openai\rest\OpenAIEndpoint;
 use com\openai\Tools;
 use com\openai\tools\Functions;
-use util\cmd\Console;
 
 $functions= (new Functions())->register('weather', new Weather());
 
@@ -131,6 +130,7 @@ If tool calls are requested by the LLM, invoke them and return to next completio
 
 ```php
 use lang\Throwable;
+use util\cmd\Console;
 
 // ...setup code from above...
 
