@@ -3,6 +3,9 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Added support for optional organization and project identifiers, see
+  https://platform.openai.com/docs/api-reference/authentication
+  (@thekid)
 * Merged PR #4: Implement Azure AI endpoints, which differ in the way
   they pass the API key and that they need an API version.
   (@thekid)
