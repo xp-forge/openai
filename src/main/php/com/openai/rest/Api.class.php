@@ -1,6 +1,6 @@
 <?php namespace com\openai\rest;
 
-use webservices\rest\{RestResource, UnexpectedStatus};
+use webservices\rest\{RestResource, RestResponse, UnexpectedStatus};
 
 class Api {
   private $resource;
@@ -8,6 +8,17 @@ class Api {
   /** Creates a new API instance from a given REST resource */
   public function __construct(RestResource $resource) {
     $this->resource= $resource;
+  }
+
+  /** Transmits given payload to the API and returns response */
+  public function transmit($payload): RestResponse {
+    $r= $this->resource
+      ->accepting('application/json')
+      ->post($payload, 'application/json')
+    ;
+    if (200 === $r->status()) return $r;
+
+    throw new UnexpectedStatus($r);
   }
 
   /** Invokes API and returns result */

@@ -1,5 +1,6 @@
 <?php namespace com\openai\unittest;
 
+use io\streams\Streams;
 use test\{Assert, Expect, Test};
 use webservices\rest\{TestEndpoint, UnexpectedStatus};
 
@@ -44,6 +45,15 @@ abstract class ApiEndpointTest {
     Assert::equals(
       ['choices' => [['message' => ['role' => 'assistant', 'content' => 'Test']]]],
       $endpoint->api('/chat/completions')->stream(['stream' => true])->result()
+    );
+  }
+
+  #[Test]
+  public function transmit() {
+    $endpoint= $this->fixture($this->testingEndpoint());
+    Assert::equals(
+      '{"choices":[{"message":{"role":"assistant","content":"Test"}}]}',
+      Streams::readAll($endpoint->api('/chat/completions')->transmit([])->stream())
     );
   }
 
