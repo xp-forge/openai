@@ -3,6 +3,8 @@
 use webservices\rest\{RestResource, RestResponse, UnexpectedStatus};
 
 class Api {
+  const JSON= 'application/json';
+
   private $resource;
 
   /** Creates a new API instance from a given REST resource */
@@ -13,8 +15,8 @@ class Api {
   /** Transmits given payload to the API and returns response */
   public function transmit($payload): RestResponse {
     $r= $this->resource
-      ->accepting('application/json')
-      ->post($payload, 'application/json')
+      ->accepting(self::JSON)
+      ->post($payload, self::JSON)
     ;
     if (200 === $r->status()) return $r;
 
@@ -24,8 +26,8 @@ class Api {
   /** Invokes API and returns result */
   public function invoke(array $payload) {
     $r= $this->resource
-      ->accepting('application/json')
-      ->post(['stream' => false] + $payload, 'application/json')
+      ->accepting(self::JSON)
+      ->post(['stream' => false] + $payload, self::JSON)
     ;
     if (200 === $r->status()) return $r->value();
 
@@ -36,7 +38,7 @@ class Api {
   public function stream(array $payload): EventStream {
     $r= $this->resource
       ->accepting('text/event-stream')
-      ->post(['stream' => true] + $payload, 'application/json')
+      ->post(['stream' => true] + $payload, self::JSON)
     ;
     if (200 === $r->status()) return new EventStream($r->stream());
 
