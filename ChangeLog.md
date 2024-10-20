@@ -3,6 +3,9 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Merged PR #6: Add `Api::transmit()` to invoke API and return response
+  (@thekid)
+
 ## 0.1.0 / 2024-10-19
 
 * Added support for optional organization and project identifiers, see
