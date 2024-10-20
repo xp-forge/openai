@@ -16,11 +16,12 @@ class Api {
    * Transmits given payload to the API and returns response
    *
    * @param  var $payload
+   * @param  string $mime Defaults to JSON
    * @return webservices.rest.RestResponse
    * @throws webservices.rest.UnexpectedStatus
    */
-  public function transmit($payload): RestResponse {
-    $r= $this->resource->post($payload, self::JSON);
+  public function transmit($payload, $mime= self::JSON): RestResponse {
+    $r= $this->resource->post($payload, $mime);
     if (200 === $r->status()) return $r;
 
     throw new UnexpectedStatus($r);
