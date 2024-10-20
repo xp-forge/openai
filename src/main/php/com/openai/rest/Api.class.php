@@ -17,6 +17,7 @@ class Api {
    *
    * @param  var $payload
    * @return webservices.rest.RestResponse
+   * @throws webservices.rest.UnexpectedStatus
    */
   public function transmit($payload): RestResponse {
     $r= $this->resource->post($payload, self::JSON);
@@ -27,23 +28,13 @@ class Api {
 
   /** Invokes API and returns result */
   public function invoke(array $payload) {
-    $r= $this->resource
-      ->accepting(self::JSON)
-      ->post(['stream' => false] + $payload, self::JSON)
-    ;
-    if (200 === $r->status()) return $r->value();
-
-    throw new UnexpectedStatus($r);
+    $this->resource->accepting(self::JSON);
+    return $this->transmit(['stream' => false] + $payload)->value();
   }
 
   /** Streams API response */
   public function stream(array $payload): EventStream {
-    $r= $this->resource
-      ->accepting('text/event-stream')
-      ->post(['stream' => true] + $payload, self::JSON)
-    ;
-    if (200 === $r->status()) return new EventStream($r->stream());
-
-    throw new UnexpectedStatus($r);
+    $this->resource->accepting('text/event-stream');
+    return new EventStream($this->transmit(['stream' => true] + $payload)->stream());
   }
 }
