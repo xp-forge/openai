@@ -91,7 +91,7 @@ use com\openai\rest\OpenAIEndpoint;
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $payload= [
   'input' => $input,
-  'voice' => 'alloy',
+  'voice' => 'alloy',  // or: echo, fable, onyx, nova, shimmer
   'model' => 'tts-1',
 ];
 
