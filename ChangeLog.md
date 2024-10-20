@@ -3,6 +3,8 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.2.0 / 2024-10-20
+
 * Included usage in streaming responses using `{"include_usage": true}`,
   implementing feature requested in #5
   (@thekid)
