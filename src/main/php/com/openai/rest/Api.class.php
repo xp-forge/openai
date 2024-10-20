@@ -1,6 +1,6 @@
 <?php namespace com\openai\rest;
 
-use webservices\rest\{RestResource, RestResponse, UnexpectedStatus};
+use webservices\rest\{RestResource, RestResponse, RestUpload, UnexpectedStatus};
 
 class Api {
   const JSON= 'application/json';
@@ -26,6 +26,11 @@ class Api {
     if (200 === $r->status()) return $r;
 
     throw new UnexpectedStatus($r);
+  }
+
+  /** Starts an upload */
+  public function upload(): RestUpload {
+    return $this->resource->upload('POST');
   }
 
   /** Invokes API and returns result */
