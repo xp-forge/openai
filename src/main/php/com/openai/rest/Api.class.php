@@ -12,12 +12,14 @@ class Api {
     $this->resource= $resource;
   }
 
-  /** Transmits given payload to the API and returns response */
+  /**
+   * Transmits given payload to the API and returns response
+   *
+   * @param  var $payload
+   * @return webservices.rest.RestResponse
+   */
   public function transmit($payload): RestResponse {
-    $r= $this->resource
-      ->accepting(self::JSON)
-      ->post($payload, self::JSON)
-    ;
+    $r= $this->resource->post($payload, self::JSON);
     if (200 === $r->status()) return $r;
 
     throw new UnexpectedStatus($r);
