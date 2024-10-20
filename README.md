@@ -80,6 +80,27 @@ Console::writeLine($ai->api('/embeddings')->invoke([
 ));
 ```
 
+Text to speech
+--------------
+To stream generate audio, use the API's *transmit()* method, which sends the given payload and returns the response. See https://platform.openai.com/docs/guides/text-to-speech/overview
+
+```php
+use util\cmd\Console;
+use com\openai\rest\OpenAIEndpoint;
+
+$ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
+$payload= [
+  'input' => $input,
+  'voice' => 'alloy',
+  'model' => 'tts-1',
+];
+
+$stream= $ai->api('/audio/speech')->transmit($payload)->stream();
+while ($stream->available()) {
+  Console::write($stream->read());
+}
+```
+
 Tracing the calls
 -----------------
 REST API calls can be traced with the [logging library](https://github.com/xp-framework/logging):
