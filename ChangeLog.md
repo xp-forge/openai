@@ -3,6 +3,9 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Included usage in streaming responses using `{"include_usage": true}`,
+  implementing feature requested in #5
+  (@thekid)
 * Merged PR #6: Add `Api::transmit()` to invoke API and return response
   (@thekid)
 

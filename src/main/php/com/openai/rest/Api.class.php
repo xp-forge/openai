@@ -4,6 +4,7 @@ use webservices\rest\{RestResource, RestResponse, UnexpectedStatus};
 
 class Api {
   const JSON= 'application/json';
+  const STREAMING= ['stream' => true, 'stream_options' => ['include_usage' => true]];
 
   private $resource;
 
@@ -30,12 +31,12 @@ class Api {
   /** Invokes API and returns result */
   public function invoke(array $payload) {
     $this->resource->accepting(self::JSON);
-    return $this->transmit(['stream' => false] + $payload)->value();
+    return $this->transmit($payload)->value();
   }
 
   /** Streams API response */
   public function stream(array $payload): EventStream {
     $this->resource->accepting('text/event-stream');
-    return new EventStream($this->transmit(['stream' => true] + $payload)->stream());
+    return new EventStream($this->transmit(self::STREAMING + $payload)->stream());
   }
 }
