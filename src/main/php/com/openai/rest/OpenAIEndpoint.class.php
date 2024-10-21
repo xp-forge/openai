@@ -9,6 +9,7 @@ use webservices\rest\Endpoint;
  * @test com.openai.unittest.OpenAIEndpointTest
  */
 class OpenAIEndpoint extends ApiEndpoint {
+  private $endpoint;
 
   /**
    * Creates a new OpenAI endpoint
@@ -18,13 +19,25 @@ class OpenAIEndpoint extends ApiEndpoint {
    * @param  ?string $project
    */
   public function __construct($arg, $organization= null, $project= null) {
-    parent::__construct($arg instanceof Endpoint ? $arg : new Endpoint($arg));
+    $this->endpoint= $arg instanceof Endpoint ? $arg : new Endpoint($arg);
 
     // Pass optional organization and project IDs
     $headers= [];
     $organization && $headers['OpenAI-Organization']= $organization;
     $project && $headers['OpenAI-Project']= $project;
     $headers && $this->endpoint->with($headers);
+  }
+
+  /** @return [:var] */
+  public function headers() { return $this->endpoint->headers(); }
+
+  /**
+   * Provides a log category for tracing requests
+   *
+   * @param  ?util.log.LogCategory $cat
+   */
+  public function setTrace($cat) {
+    $this->endpoint->setTrace($cat);
   }
 
   /** Returns an API */

@@ -9,6 +9,7 @@ use webservices\rest\Endpoint;
  * @test com.openai.unittest.AzureAIEndpointTest
  */
 class AzureAIEndpoint extends ApiEndpoint {
+  private $endpoint;
   public $version;
 
   /**
@@ -19,13 +20,25 @@ class AzureAIEndpoint extends ApiEndpoint {
    */
   public function __construct($arg, $version= null) {
     if ($arg instanceof Endpoint) {
-      parent::__construct($arg);
+      $this->endpoint= $arg;
       $this->version= $version;
     } else {
       $uri= $arg instanceof URI ? $arg : new URI($arg);
       $this->version= $version ?? $uri->param('api-version');
-      parent::__construct((new Endpoint($uri))->with(['Authorization' => null, 'API-Key' => $uri->user()]));
+      $this->endpoint= (new Endpoint($uri))->with(['Authorization' => null, 'API-Key' => $uri->user()]);
     }
+  }
+
+  /** @return [:var] */
+  public function headers() { return $this->endpoint->headers(); }
+
+  /**
+   * Provides a log category for tracing requests
+   *
+   * @param  ?util.log.LogCategory $cat
+   */
+  public function setTrace($cat) {
+    $this->endpoint->setTrace($cat);
   }
 
   /** Returns an API */
