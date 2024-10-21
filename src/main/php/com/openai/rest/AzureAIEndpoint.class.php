@@ -10,7 +10,7 @@ use webservices\rest\Endpoint;
  */
 class AzureAIEndpoint extends ApiEndpoint {
   private $endpoint;
-  public $version;
+  public $version, $rateLimit;
 
   /**
    * Creates a new OpenAI endpoint
@@ -27,6 +27,7 @@ class AzureAIEndpoint extends ApiEndpoint {
       $this->version= $version ?? $uri->param('api-version');
       $this->endpoint= (new Endpoint($uri))->with(['Authorization' => null, 'API-Key' => $uri->user()]);
     }
+    $this->rateLimit= new RateLimit();
   }
 
   /** @return [:var] */
@@ -43,6 +44,12 @@ class AzureAIEndpoint extends ApiEndpoint {
 
   /** Returns an API */
   public function api(string $path, array $segments= []): Api {
-    return new Api($this->endpoint->resource(ltrim($path, '/').'?api-version='.$this->version, $segments));
+    return new Api(
+      $this->endpoint->resource(ltrim($path, '/').'?api-version='.$this->version, $segments),
+      $this->rateLimit
+    );
   }
+
+  /** @return string */
+  public function toString() { return nameof($this).'(->'.$this->endpoint->base().'?api-version='.$this->version.')'; }
 }

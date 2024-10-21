@@ -1,6 +1,7 @@
 <?php namespace com\openai\rest;
 
 use lang\IllegalArgumentException;
+use util\Objects;
 
 /**
  * Allows distributing API requests to different endpoints.
@@ -36,11 +37,34 @@ class Distributed extends ApiEndpoint {
 
   /** Distributes API calls */
   public function distribute(): ApiEndpoint {
-    return $this->endpoints[rand(0, sizeof($this->endpoints) - 1)];
+    $max= 0;
+    $most= null;
+    $candidates= [];
+    foreach ($this->endpoints as $i => $endpoint) {
+      if (null === $endpoint->rateLimit->remaining) {
+        $candidates[]= $endpoint;
+      } else if ($endpoint->rateLimit->remaining > $max) {
+        $most= $endpoint;
+        $max= $endpoint->rateLimit->remaining;
+      }
+    }
+
+    // Select between the one with the most remaining requests, including any
+    // unlimited ones, and fall back to a random endpoint.
+    if ($most) {
+      $candidates[]= $most;
+    } else if (empty($candidates)) {
+      $candidates= $this->endpoints;
+    }
+
+    return $candidates[rand(0, sizeof($candidates) - 1)];
   }
 
   /** Distributes request and returns an API */
   public function api(string $path, array $segments= []): Api {
     return $this->distribute()->api($path, $segments);
   }
+
+  /** @return string */
+  public function toString() { return nameof($this).Objects::stringOf($this->endpoints); }
 }

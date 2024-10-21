@@ -10,6 +10,7 @@ use webservices\rest\Endpoint;
  */
 class OpenAIEndpoint extends ApiEndpoint {
   private $endpoint;
+  public $rateLimit;
 
   /**
    * Creates a new OpenAI endpoint
@@ -20,6 +21,7 @@ class OpenAIEndpoint extends ApiEndpoint {
    */
   public function __construct($arg, $organization= null, $project= null) {
     $this->endpoint= $arg instanceof Endpoint ? $arg : new Endpoint($arg);
+    $this->rateLimit= new RateLimit();
 
     // Pass optional organization and project IDs
     $headers= [];
@@ -42,6 +44,9 @@ class OpenAIEndpoint extends ApiEndpoint {
 
   /** Returns an API */
   public function api(string $path, array $segments= []): Api {
-    return new Api($this->endpoint->resource(ltrim($path, '/'), $segments));
+    return new Api($this->endpoint->resource(ltrim($path, '/'), $segments), $this->rateLimit);
   }
+
+  /** @return string */
+  public function toString() { return nameof($this).'(->'.$this->endpoint->base().')'; }
 }
