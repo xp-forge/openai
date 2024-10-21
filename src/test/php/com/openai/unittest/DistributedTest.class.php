@@ -1,7 +1,8 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\rest\{Api, Distributed, OpenAIEndpoint};
-use test\{Assert, Before, Test};
+use lang\IllegalArgumentException;
+use test\{Assert, Before, Expect, Test};
 
 class DistributedTest {
   private $endpoints;
@@ -17,6 +18,11 @@ class DistributedTest {
   #[Test]
   public function can_create() {
     new Distributed($this->endpoints);
+  }
+
+  #[Test, Expect(IllegalArgumentException::class)]
+  public function cannot_be_empty() {
+    new Distributed([]);
   }
 
   #[Test]

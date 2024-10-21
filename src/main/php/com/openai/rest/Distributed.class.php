@@ -1,5 +1,7 @@
 <?php namespace com\openai\rest;
 
+use lang\IllegalArgumentException;
+
 /**
  * Allows distributing API requests to different endpoints.
  *
@@ -8,8 +10,16 @@
 class Distributed extends ApiEndpoint {
   private $endpoints;
 
-  /** @param com.openai.rest.ApiEndpoint[] $endpoints */
+  /**
+   * Creates a new distributed endpoint from a list of endpoints
+   *
+   * @param  com.openai.rest.ApiEndpoint[] $endpoints
+   * @throws lang.IllegalArgumentException;
+   */
   public function __construct(array $endpoints) {
+    if (empty($endpoints)) {
+      throw new IllegalArgumentException('Endpoints cannot be empty');
+    }
     $this->endpoints= $endpoints;
   }
 
