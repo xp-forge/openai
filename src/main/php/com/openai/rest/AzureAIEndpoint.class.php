@@ -9,7 +9,8 @@ use webservices\rest\Endpoint;
  * @test com.openai.unittest.AzureAIEndpointTest
  */
 class AzureAIEndpoint extends ApiEndpoint {
-  public $version;
+  private $endpoint;
+  public $version, $rateLimit;
 
   /**
    * Creates a new OpenAI endpoint
@@ -19,17 +20,36 @@ class AzureAIEndpoint extends ApiEndpoint {
    */
   public function __construct($arg, $version= null) {
     if ($arg instanceof Endpoint) {
-      parent::__construct($arg);
+      $this->endpoint= $arg;
       $this->version= $version;
     } else {
       $uri= $arg instanceof URI ? $arg : new URI($arg);
       $this->version= $version ?? $uri->param('api-version');
-      parent::__construct((new Endpoint($uri))->with(['Authorization' => null, 'API-Key' => $uri->user()]));
+      $this->endpoint= (new Endpoint($uri))->with(['Authorization' => null, 'API-Key' => $uri->user()]);
     }
+    $this->rateLimit= new RateLimit();
+  }
+
+  /** @return [:var] */
+  public function headers() { return $this->endpoint->headers(); }
+
+  /**
+   * Provides a log category for tracing requests
+   *
+   * @param  ?util.log.LogCategory $cat
+   */
+  public function setTrace($cat) {
+    $this->endpoint->setTrace($cat);
   }
 
   /** Returns an API */
   public function api(string $path, array $segments= []): Api {
-    return new Api($this->endpoint->resource(ltrim($path, '/').'?api-version='.$this->version, $segments));
+    return new Api(
+      $this->endpoint->resource(ltrim($path, '/').'?api-version='.$this->version, $segments),
+      $this->rateLimit
+    );
   }
+
+  /** @return string */
+  public function toString() { return nameof($this).'(->'.$this->endpoint->base().'?api-version='.$this->version.')'; }
 }
