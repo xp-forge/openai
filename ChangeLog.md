@@ -3,6 +3,12 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.3.0 / ????-??-??
+
+* Merged PR #10: Add endpoint implementation which will distribute API
+  requests based on rate limits; see also #7
+  (@thekid)
+
 ## 0.2.0 / 2024-10-20
 
 * Included usage in streaming responses using `{"include_usage": true}`,
