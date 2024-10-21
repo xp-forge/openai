@@ -77,17 +77,18 @@ class DistributedTest {
     $b= $this->testingEndpoint(997);
 
     // Invoke both as the limits are not updated until after a request
+    // The rate limits will be $a= 999, $b= 996 after these.
     $a->api('/chat/completions')->invoke(['prompt' => 'Test a']);
     $b->api('/chat/completions')->invoke(['prompt' => 'Test b']);
-    $before= [$a->rateLimit->remaining, $b->rateLimit->remaining];
 
-    // Now invoke in a distributed manner
+    // Now invoke in a distributed manner. All requests will go to $a,
+    // since it has more remaining requests than $b
     $distributed= new Distributed([$a, $b]);
     for ($i= 0; $i < 3; $i++) {
       $distributed->api('/chat/completions')->invoke(['prompt' => 'Test']);
     }
 
-    Assert::equals($before[0] - 3, $a->rateLimit->remaining);
-    Assert::equals($before[1], $b->rateLimit->remaining);
+    Assert::equals(996, $a->rateLimit->remaining);
+    Assert::equals(996, $b->rateLimit->remaining);
   }
 }
