@@ -3,7 +3,7 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
-## 0.3.0 / ????-??-??
+## 0.3.0 / 2024-10-22
 
 * Merged PR #10: Add endpoint implementation which will distribute API
   requests based on rate limits; see also #7
