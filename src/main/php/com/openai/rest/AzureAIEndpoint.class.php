@@ -4,7 +4,9 @@ use util\URI;
 use webservices\rest\Endpoint;
 
 /**
- * Azure OpenAI REST API endpoint
+ * Azure OpenAI APIs. Usage slightly differs from their public OpenAI counterpart,
+ * as the API Key must be passed in a special header, and an API version must be
+ * included in the query string.
  *
  * @test com.openai.unittest.AzureAIEndpointTest
  */
