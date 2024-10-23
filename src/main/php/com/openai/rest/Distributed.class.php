@@ -4,7 +4,9 @@ use lang\IllegalArgumentException;
 use util\Objects;
 
 /**
- * Allows distributing API requests to different endpoints.
+ * Supports distributing requests over multiple endpoints to increase
+ * performance, using the rate limits returned in the response headers
+ * as weights for selecting the target.
  *
  * @test  com.openai.unittest.DistributedTest
  */
