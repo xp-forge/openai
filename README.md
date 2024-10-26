@@ -166,14 +166,14 @@ $payload= [
 
 ### Invoking custom functions
 
-If tool calls are requested by the LLM, invoke them and return to next completion cycle. Arguments and return values are encoded as *JSON*. See https://platform.openai.com/docs/guides/function-calling/configuring-parallel-function-calling
+If tool calls are requested by the LLM, invoke them and return to next completion cycle. See https://platform.openai.com/docs/guides/function-calling/configuring-parallel-function-calling
 
 ```php
 use util\cmd\Console;
 
 // ...setup code from above...
-$calls= $functions->calls()->catching(fn($t) => $t->printStackTrace());
 
+$calls= $functions->calls()->catching(fn($t) => $t->printStackTrace());
 complete: $result= $ai->api('/chat/completions')->invoke($payload));
 
 // If tool calls are requested, invoke them and return to next completion cycle
@@ -194,6 +194,29 @@ if ('tool_calls' === ($result['choices'][0]['finish_reason'] ?? null)) {
 
 // Print out final result
 Console::writeLine($result);
+```
+
+### Passing context
+
+Functions can be passed a context as follows by annotating parameters with the *Context* annotation:
+
+```php
+use com\mongodb\{Collection, Document};
+use com\openai\tools\{Context, Param};
+
+// Declaration
+class Memory {
+
+  public function __construct(private Collection $facts) { }
+
+  public function store(#[Context] Document $user, #[Param] string $fact) {
+    return $this->facts->insert(new Document(['owner' => $user->id(), 'fact' => $fact]))->id();
+  }
+}
+
+// Pass the context to the call() method
+$context= ['user' => $user];
+$return= $calls->call($call['function']['name'], $call['function']['arguments'], $context);
 ```
 
 Azure OpenAI
