@@ -245,6 +245,9 @@ $payload= [
 ];
 
 Console::writeLine($ai->api('/chat/completions')->invoke($payload));
+foreach ($endpoints as $i => $endpoint) {
+  Console::writeLine('Endpoint #', $i, ': ', $endpoint->rateLimit());
+}
 ```
 
 Realtime API
