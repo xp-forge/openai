@@ -3,14 +3,18 @@
 use Throwable as Any;
 use lang\reflection\TargetException;
 use lang\{Throwable, IllegalArgumentException};
+use util\data\Marshalling;
 
 /** @test com.openai.unittest.CallsTest */
 class Calls {
-  private $functions;
+  private $functions, $marshalling;
   private $catch= null;
 
   /** Creates a new instance */
-  public function __construct(Functions $functions) { $this->functions= $functions; }
+  public function __construct(Functions $functions) {
+    $this->functions= $functions;
+    $this->marshalling= new Marshalling();
+  }
 
   /**
    * Pass an error handler
@@ -62,7 +66,7 @@ class Calls {
 
       // Support NULL inside context or arguments
       if (array_key_exists($named, $ptr)) {
-        $pass[]= $ptr[$named];
+        $pass[]= $this->marshalling->unmarshal($ptr[$named], $reflect->constraint()->type());
       } else if ($reflect->optional()) {
         $pass[]= $reflect->default();
       } else {
@@ -70,7 +74,7 @@ class Calls {
       }
     }
 
-    return $method->invoke($instance, $pass);
+    return $this->marshalling->marshal($method->invoke($instance, $pass));
   }
 
   /**
