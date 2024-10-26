@@ -264,7 +264,7 @@ foreach ($endpoints as $i => $endpoint) {
 }
 ```
 
-For more complex load balancing, have a look at [this blog article using Azure API management](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/openai-at-scale-maximizing-api-management-through-effective/ba-p/4240317).
+For more complex load balancing, have a look at [this blog article using Azure API management](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/openai-at-scale-maximizing-api-management-through-effective/ba-p/4240317)
 
 Realtime API
 ------------
@@ -274,3 +274,4 @@ See also
 --------
 * https://github.com/openai/tiktoken/
 * https://github.com/openai/openai-python
+* https://github.com/Azure-Samples/azure-openai-reverse-proxy
