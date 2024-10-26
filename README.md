@@ -225,6 +225,28 @@ $payload= [
 Console::writeLine($ai->api('/chat/completions')->invoke($payload));
 ```
 
+Distributing requests
+---------------------
+The *Distributed* endpoint allows to distribute requests over multiple endpoints. The *ByRemainingRequests* class uses the `x-ratelimit-remaining-requests` header to determine the target. See https://platform.openai.com/docs/guides/rate-limits
+
+```php
+use com\openai\rest\{AzureAIEndpoint, Distributed, ByRemainingRequests};
+use util\cmd\Console;
+
+$endpoints= [
+  new AzureAIEndpoint('https://...@r1.openai.azure.com/openai/deployments/mini', '2024-02-01'),
+  new AzureAIEndpoint('https://...@r2.openai.azure.com/openai/deployments/mini', '2024-02-01'),
+];
+
+$ai= new Distributed($endpoints, new ByRemainingRequests());
+$payload= [
+  'model'    => 'gpt-4o-mini',
+  'messages' => [['role' => 'user', 'content' => $prompt]],
+];
+
+Console::writeLine($ai->api('/chat/completions')->invoke($payload));
+```
+
 Realtime API
 ------------
 *Coming soon*
