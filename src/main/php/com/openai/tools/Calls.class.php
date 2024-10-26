@@ -100,13 +100,8 @@ class Calls {
   /**
    * Call the function, including handling JSON de- and encoding and converting
    * caught exceptions to a serializable form.
-   *
-   * @param  string $name
-   * @param  string $arguments
-   * @param  [:var] $context
-   * @return string
    */
-  public function call($name, $arguments, $context= []) {
+  public function call(string $name, string $arguments, array $context= []): string {
     try {
       list($instance, $method)= $this->functions->target($name);
 
