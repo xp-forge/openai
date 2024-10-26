@@ -3,6 +3,10 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Merged PR #13: Use marshalling for function calls. This way functions
+  can have their arguments converted from and return values converted 
+  to JSON primitives 
+  (@thekid)
 * Merged PR #12: Wrap function calling in `Calls` API. This simplifies
   function calling by handling JSON de- and encoding as well as supplying
   a default error handling mechanism
