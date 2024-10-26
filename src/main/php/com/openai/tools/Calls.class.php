@@ -5,7 +5,12 @@ use lang\reflection\TargetException;
 use lang\{Throwable, IllegalArgumentException};
 use util\data\Marshalling;
 
-/** @test com.openai.unittest.CallsTest */
+/**
+ * Function calls
+ *
+ * @test  com.openai.unittest.CallsTest
+ * @test  com.openai.unittest.MarshallingTest
+ */
 class Calls {
   private $functions, $marshalling;
   private $catch= null;
