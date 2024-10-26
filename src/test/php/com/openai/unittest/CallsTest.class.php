@@ -15,7 +15,7 @@ class CallsTest {
       public function greet(
         #[Param]
         $name,
-        #[Context]
+        #[Context('phrase')]
         $greeting= 'Hello'
       ) {
         if (empty($name)) {
@@ -44,7 +44,7 @@ class CallsTest {
   public function context_passed() {
     Assert::equals(
       'Hallo World',
-      (new Calls($this->functions))->invoke('testing_greet', ['name' => 'World'], ['greeting' => 'Hallo'])
+      (new Calls($this->functions))->invoke('testing_greet', ['name' => 'World'], ['phrase' => 'Hallo'])
     );
   }
 

@@ -51,18 +51,25 @@ class Calls {
 
     $pass= [];
     foreach ($method->parameters() as $param => $reflect) {
-      if ($reflect->annotations()->provides(Context::class)) {
+      $annotations= $reflect->annotations();
+      if ($annotation= $annotations->type(Context::class)) {
         $ptr= &$context;
+        $named= $annotation->argument('name') ?? $annotation->argument(0) ?? $param;
+      } else if ($annotation= $annotations->type(Param::class)) {
+        $ptr= &$arguments;
+        $named= $annotation->argument('name') ?? $annotation->argument(0) ?? $param;
       } else {
         $ptr= &$arguments;
+        $named= $param;
       }
 
-      if (array_key_exists($param, $ptr)) {
-        $pass[]= $ptr[$param];
+      // Support NULL inside context or arguments
+      if (array_key_exists($named, $ptr)) {
+        $pass[]= $ptr[$named];
       } else if ($reflect->optional()) {
         $pass[]= $reflect->default();
       } else {
-        throw new IllegalArgumentException("Missing argument {$param} for {$name}");
+        throw new IllegalArgumentException("Missing argument {$named} for {$name}");
       }
     }
 
