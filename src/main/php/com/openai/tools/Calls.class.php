@@ -115,13 +115,13 @@ class Calls {
         $pass[]= $this->marshalling->unmarshal($value, $type);
       }
       
-      $result= $this->marshalling->marshal($method->invoke($instance, $pass));
+      $result= $method->invoke($instance, $pass);
     } catch (TargetException $e) {
       $result= $this->error($e->getCause());
     } catch (Any $e) {
       $result= $this->error(Throwable::wrap($e));
     }
 
-    return Json::of($result);
+    return Json::of($this->marshalling->marshal($result));
   }
 }
