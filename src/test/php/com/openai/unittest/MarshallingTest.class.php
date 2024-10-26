@@ -14,7 +14,7 @@ class MarshallingTest {
       }
     }));
 
-    Assert::equals('26.10.2024', $calls->invoke('testing_date', ['in' => '2024-10-26']));
+    Assert::equals('"26.10.2024"', $calls->call('testing_date', '{"in": "2024-10-26"}'));
   }
 
   #[Test]
@@ -25,6 +25,6 @@ class MarshallingTest {
       }
     }));
 
-    Assert::equals('2024-10-26T00:00:00+0000', $calls->invoke('testing_date', ['in' => '2024-10-26']));
+    Assert::equals('"2024-10-26T00:00:00+0000"', $calls->call('testing_date', '{"in": "2024-10-26"}'));
   }
 }

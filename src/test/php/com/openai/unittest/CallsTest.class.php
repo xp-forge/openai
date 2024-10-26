@@ -48,7 +48,7 @@ class CallsTest {
     );
   }
 
-  #[Test, Expect(class: IllegalArgumentException::class, message: 'Missing argument name for testing_greet')]
+  #[Test, Expect(class: IllegalArgumentException::class, message: 'Missing argument name for greet')]
   public function missing_argument() {
     (new Calls($this->functions))->invoke('testing_greet', []);
   }
