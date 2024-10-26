@@ -2,15 +2,25 @@
 
 use Throwable as Any;
 use lang\reflection\TargetException;
-use lang\{Throwable, IllegalArgumentException};
+use lang\{Type, Throwable, IllegalArgumentException};
+use text\json\Json;
+use util\data\Marshalling;
 
-/** @test com.openai.unittest.CallsTest */
+/**
+ * Function calls
+ *
+ * @test  com.openai.unittest.CallsTest
+ * @test  com.openai.unittest.MarshallingTest
+ */
 class Calls {
-  private $functions;
+  private $functions, $marshalling;
   private $catch= null;
 
   /** Creates a new instance */
-  public function __construct(Functions $functions) { $this->functions= $functions; }
+  public function __construct(Functions $functions) {
+    $this->functions= $functions;
+    $this->marshalling= new Marshalling();
+  }
 
   /**
    * Pass an error handler
@@ -37,59 +47,77 @@ class Calls {
   }
 
   /**
+   * Yields argument types and values to pass
+   *
+   * @param  lang.reflection.Method
+   * @param  [:var] $named
+   * @param  [:var] $context
+   * @return iterable
+   */
+  private function pass($method, $named, $context) {
+    foreach ($method->parameters() as $param => $reflect) {
+      $annotations= $reflect->annotations();
+      if ($annotation= $annotations->type(Context::class)) {
+        $ptr= &$context;
+        $name= $annotation->argument('name') ?? $annotation->argument(0) ?? $param;
+      } else {
+        $ptr= &$named;
+        $name= $param;
+      }
+
+      // Support NULL inside context or arguments
+      if (array_key_exists($name, $ptr)) {
+        yield $reflect->constraint()->type() => $ptr[$name];
+      } else if ($reflect->optional()) {
+        yield Type::$VAR => $reflect->default();
+      } else {
+        throw new IllegalArgumentException("Missing argument {$name} for {$method->name()}");
+      }
+    }
+  }
+
+  /**
    * Invoke the function with named arguments and a given context
    *
    * @param  string $name
-   * @param  [:var] $arguments
+   * @param  [:var] $named
    * @param  [:var] $context
    * @return var
    * @throws lang.IllegalArgumentException
    * @throws lang.reflect.TargetException
    */
-  public function invoke($name, $arguments, $context= []) {
+  public function invoke(string $name, array $named= [], array $context= []) {
     list($instance, $method)= $this->functions->target($name);
 
     $pass= [];
-    foreach ($method->parameters() as $param => $reflect) {
-      $annotations= $reflect->annotations();
-      if ($annotation= $annotations->type(Context::class)) {
-        $ptr= &$context;
-        $named= $annotation->argument('name') ?? $annotation->argument(0) ?? $param;
-      } else {
-        $ptr= &$arguments;
-        $named= $param;
-      }
-
-      // Support NULL inside context or arguments
-      if (array_key_exists($named, $ptr)) {
-        $pass[]= $ptr[$named];
-      } else if ($reflect->optional()) {
-        $pass[]= $reflect->default();
-      } else {
-        throw new IllegalArgumentException("Missing argument {$named} for {$name}");
-      }
+    foreach ($this->pass($method, $named, $context) as $value) {
+      $pass[]= $value;
     }
 
     return $method->invoke($instance, $pass);
   }
 
   /**
-   * Call the function, including handling JSON de- and encoding and converting
-   * caught exceptions to a serializable form.
-   *
-   * @param  string $name
-   * @param  string $arguments
-   * @param  [:var] $context
-   * @return string
+   * Call the given function, including handling JSON de- and encoding and converting
+   * caught exceptions to a serializable form. This method is meant to be used directly
+   * by and for LLM function calling.
    */
-  public function call($name, $arguments, $context= []) {
+  public function call(string $name, string $arguments, array $context= []): string {
     try {
-      $result= $this->invoke($name, json_decode($arguments, null, 512, JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR), $context);
+      list($instance, $method)= $this->functions->target($name);
+
+      $pass= [];
+      foreach ($this->pass($method, Json::read($arguments), $context) as $type => $value) {
+        $pass[]= $this->marshalling->unmarshal($value, $type);
+      }
+      
+      $result= $method->invoke($instance, $pass);
     } catch (TargetException $e) {
       $result= $this->error($e->getCause());
     } catch (Any $e) {
       $result= $this->error(Throwable::wrap($e));
     }
-    return json_encode($result);
+
+    return Json::of($this->marshalling->marshal($result));
   }
 }

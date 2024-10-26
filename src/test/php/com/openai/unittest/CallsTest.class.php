@@ -48,7 +48,7 @@ class CallsTest {
     );
   }
 
-  #[Test, Expect(class: IllegalArgumentException::class, message: 'Missing argument name for testing_greet')]
+  #[Test, Expect(class: IllegalArgumentException::class, message: 'Missing argument name for greet')]
   public function missing_argument() {
     (new Calls($this->functions))->invoke('testing_greet', []);
   }
@@ -64,7 +64,7 @@ class CallsTest {
   #[Test]
   public function call_invalid_json() {
     Assert::equals(
-      '{"error":"lang.Error","message":"Control character error, possibly incorrectly encoded"}',
+      '{"error":"lang.FormatException","message":"Unclosed string "}',
       (new Calls($this->functions))->call('testing_greet', '{"unclosed')
     );
   }
