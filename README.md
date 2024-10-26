@@ -169,10 +169,10 @@ $payload= [
 If tool calls are requested by the LLM, invoke them and return to next completion cycle. Arguments and return values are encoded as *JSON*. See https://platform.openai.com/docs/guides/function-calling/configuring-parallel-function-calling
 
 ```php
-use lang\Throwable;
 use util\cmd\Console;
 
 // ...setup code from above...
+$calls= $functions->calls()->catching(fn($t) => $t->printStackTrace());
 
 complete: $result= $ai->api('/chat/completions')->invoke($payload));
 
@@ -181,20 +181,11 @@ if ('tool_calls' === ($result['choices'][0]['finish_reason'] ?? null)) {
   $payload['messages'][]= $result['choices'][0]['message'];
   
   foreach ($result['choices'][0]['message']['tool_calls'] as $call) {
-    try {
-      $return= $functions->invoke(
-        $call['function']['name'],
-        json_decode($call['function']['arguments'], true)
-      );
-    } catch (Throwable $t) {
-      $t->printStackTrace();
-      $return= ['error' => $t->compoundMessage()];
-    }
-
+    $return= $calls->invoke($call['function']['name'], $call['function']['arguments']);
     $payload['messages'][]= [
       'role'         => 'tool',
       'tool_call_id' => $call['id'],
-      'content'      => json_encode($return),
+      'content'      => $return,
     ];
   }
 

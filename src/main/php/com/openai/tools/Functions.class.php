@@ -103,6 +103,9 @@ class Functions implements Value {
     }
   }
 
+  /** @return com.openai.tools.Calls */
+  public function calls() { return new Calls($this); }
+
   /**
    * Invokes the given tool from a tool call
    *
@@ -110,42 +113,40 @@ class Functions implements Value {
    * @param  [:var] $arguments
    * @param  [:var] $context
    * @return var
-   * @throws lang.Throwable
+   * @throws lang.IllegalArgumentException
+   * @throws lang.reflection.TargetException
    */
   public function invoke(string $call, array $arguments, array $context= []) {
-    try {
-      sscanf($call, "%[^_]_%[^\r]", $namespace, $name);
-      if (null === ($method= $this->methods[$namespace][$name] ?? null)) {
-        throw new IllegalArgumentException(isset($this->methods[$namespace])
-          ? "Unknown function {$name} in {$namespace}"
-          : "Unknown namespace {$namespace}"
-        );
-      }
-
-      // Lazily create instance
-      list(&$instance, $new)= $this->instances[$namespace];
-      $instance??= $new();
-
-      $pass= [];
-      foreach ($method->parameters() as $param => $reflect) {
-        if ($reflect->annotations()->provides(Context::class)) {
-          $ptr= &$context[$param];
-        } else {
-          $ptr= &$arguments[$param];
-        }
-
-        if (isset($ptr)) {
-          $pass[]= $ptr;
-        } else if ($reflect->optional()) {
-          $pass[]= $reflect->default();
-        } else {
-          throw new IllegalArgumentException("Missing argument {$param} for {$call}");
-        }
-      }
-      return $method->invoke($instance, $pass);
-    } catch (TargetException $e) {
-      throw $e->getCause();
+    sscanf($call, "%[^_]_%[^\r]", $namespace, $name);
+    if (null === ($method= $this->methods[$namespace][$name] ?? null)) {
+      throw new IllegalArgumentException(isset($this->methods[$namespace])
+        ? "Unknown function {$name} in {$namespace}"
+        : "Unknown namespace {$namespace}"
+      );
     }
+
+    // Lazily create instance
+    list(&$instance, $new)= $this->instances[$namespace];
+    $instance??= $new();
+
+    $pass= [];
+    foreach ($method->parameters() as $param => $reflect) {
+      if ($reflect->annotations()->provides(Context::class)) {
+        $ptr= &$context[$param];
+      } else {
+        $ptr= &$arguments[$param];
+      }
+
+      if (isset($ptr)) {
+        $pass[]= $ptr;
+      } else if ($reflect->optional()) {
+        $pass[]= $reflect->default();
+      } else {
+        throw new IllegalArgumentException("Missing argument {$param} for {$call}");
+      }
+    }
+
+    return $method->invoke($instance, $pass);
   }
 
   /** @return string */
