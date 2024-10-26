@@ -3,6 +3,8 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.5.0 / 2024-10-26
+
 * Merged PR #13: Use marshalling for function calls. This way functions
   can have their arguments converted from and return values converted 
   to JSON primitives 
