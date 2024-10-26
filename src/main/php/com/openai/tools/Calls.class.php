@@ -108,8 +108,8 @@ class Calls {
   public function call($name, $arguments, $context= []) {
     try {
       list($instance, $method)= $this->functions->target($name);
-      $named= json_decode($arguments, null, 512, JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
 
+      $named= json_decode($arguments, null, 512, JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
       $pass= [];
       foreach ($this->pass($method, $named, $context) as $type => $value) {
         $pass[]= $this->marshalling->unmarshal($value, $type);
