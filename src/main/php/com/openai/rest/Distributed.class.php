@@ -28,6 +28,15 @@ class Distributed extends ApiEndpoint {
     $this->distribution= $distribution;
   }
 
+  /** Returns rate limit */
+  public function rateLimit(): RateLimit {
+    $r= new RateLimit();
+    foreach ($this->endpoints as $endpoint) {
+      $r->remaining+= $endpoint->rateLimit()->remaining;
+    }
+    return $r;
+  }
+
   /**
    * Provides a log category for tracing requests
    *

@@ -16,11 +16,12 @@ class ByRemainingRequests implements Distribution {
     $most= null;
     $candidates= [];
     foreach ($endpoints as $i => $endpoint) {
-      if (null === $endpoint->rateLimit->remaining) {
+      $rateLimit= $endpoint->rateLimit();
+      if (null === $rateLimit->remaining) {
         $candidates[]= $endpoint;
-      } else if ($endpoint->rateLimit->remaining > $max) {
+      } else if ($rateLimit->remaining > $max) {
         $most= $endpoint;
-        $max= $endpoint->rateLimit->remaining;
+        $max= $rateLimit->remaining;
       }
     }
 

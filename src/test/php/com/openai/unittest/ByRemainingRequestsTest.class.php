@@ -1,30 +1,12 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\rest\{Distributed, OpenAIEndpoint, ByRemainingRequests};
+use com\openai\rest\{Distributed, ByRemainingRequests};
 use test\{Assert, Before, Expect, Test};
-use webservices\rest\TestEndpoint;
 
 class ByRemainingRequestsTest {
+  use TestingEndpoint;
+
   private $fixture;
-
-  /** Returns a testing API endpoint */
-  private function testingEndpoint($remaining): OpenAIEndpoint {
-    $endpoint= new OpenAIEndpoint(new TestEndpoint([
-      'POST /chat/completions' => function($call) use(&$remaining) {
-        $remaining--;
-        return $call->respond(
-          200, 'OK',
-          ['x-ratelimit-remaining-requests' => max(0, $remaining), 'Content-Type' => 'application/json'],
-          '{"choices":[{"message":{"role":"assistant","content":"Test"}}]}'
-        );
-      }
-    ]));
-
-    // Normally this is not done until after the API has been invoked, for
-    // ease of testing purposes we'll set it here.
-    $endpoint->rateLimit->remaining= $remaining;
-    return $endpoint;
-  }
 
   #[Before]
   public function fixture() {
@@ -74,7 +56,7 @@ class ByRemainingRequestsTest {
       $distributed->api('/chat/completions')->invoke(['prompt' => 'Test']);
     }
 
-    Assert::equals(997, $a->rateLimit->remaining);
-    Assert::equals(997, $b->rateLimit->remaining);
+    Assert::equals(997, $a->rateLimit()->remaining);
+    Assert::equals(997, $b->rateLimit()->remaining);
   }
 }

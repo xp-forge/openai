@@ -9,8 +9,7 @@ use webservices\rest\Endpoint;
  * @test com.openai.unittest.OpenAIEndpointTest
  */
 class OpenAIEndpoint extends ApiEndpoint {
-  private $endpoint;
-  public $rateLimit;
+  private $endpoint, $rateLimit;
 
   /**
    * Creates a new OpenAI endpoint
@@ -29,6 +28,9 @@ class OpenAIEndpoint extends ApiEndpoint {
     $project && $headers['OpenAI-Project']= $project;
     $headers && $this->endpoint->with($headers);
   }
+
+  /** Returns rate limit */
+  public function rateLimit(): RateLimit { return $this->rateLimit; }
 
   /** @return [:var] */
   public function headers() { return $this->endpoint->headers(); }

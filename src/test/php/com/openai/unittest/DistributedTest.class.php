@@ -1,38 +1,25 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\rest\{Api, ApiEndpoint, Distributed, Distribution, OpenAIEndpoint};
+use com\openai\rest\{Api, ApiEndpoint, Distributed, Distribution};
 use lang\IllegalArgumentException;
 use test\{Assert, Before, Expect, Test, Values};
-use webservices\rest\TestEndpoint;
 
 class DistributedTest {
-  private $strategy;
+  use TestingEndpoint;
 
-  /** Returns a testing API endpoint */
-  private function testingEndpoint(int $remaining= 0): OpenAIEndpoint {
-    return new OpenAIEndpoint(new TestEndpoint([
-      'POST /chat/completions' => function($call) use(&$remaining) {
-        $remaining--;
-        return $call->respond(
-          200, 'OK',
-          ['x-ratelimit-remaining-requests' => max(0, $remaining), 'Content-Type' => 'application/json'],
-          '{"choices":[{"message":{"role":"assistant","content":"Test"}}]}'
-        );
-      }
-    ]));
-  }
+  private $strategy;
 
   /** Returns single and multiple endpoints */
   private function endpoints(): iterable {
-    yield [[$this->testingEndpoint()]];
-    yield [[$this->testingEndpoint(), $this->testingEndpoint()]];
+    yield [[$this->testingEndpoint(1000)]];
+    yield [[$this->testingEndpoint(1000), $this->testingEndpoint(null)]];
   }
 
   #[Before]
   public function strategy() {
     $this->strategy= new class() implements Distribution {
       public function distribute(array $endpoints): ApiEndpoint {
-        return $endpoints[random_int(0, sizeof($endpoints) - 1)];
+        return $endpoints[rand(0, sizeof($endpoints) - 1)];
       }
     };
   }
@@ -57,6 +44,13 @@ class DistributedTest {
     $target= $this->testingEndpoint(1000);
     (new Distributed([$target], $this->strategy))->api('/chat/completions')->invoke(['prompt' => 'Test']);
 
-    Assert::equals(999, $target->rateLimit->remaining);
+    Assert::equals(999, $target->rateLimit()->remaining);
+  }
+
+  #[Test]
+  public function rate_limit_reflects_sum_of_limits() {
+    $endpoints= [$this->testingEndpoint(1000), $this->testingEndpoint(100)];
+
+    Assert::equals(1100, (new Distributed($endpoints, $this->strategy))->rateLimit()->remaining);
   }
 }

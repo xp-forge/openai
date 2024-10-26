@@ -8,6 +8,9 @@ use util\log\Traceable;
 abstract class ApiEndpoint implements Traceable, Value {
   use Comparison;
 
+  /** Returns rate limit */
+  public abstract function rateLimit(): RateLimit;
+
   /** Returns an API */
   public abstract function api(string $path, array $segments= []): Api;
 }
