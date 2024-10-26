@@ -227,13 +227,11 @@ class FunctionsTest {
 
   #[Test, Expect(IllegalArgumentException::class)]
   public function unknown_namespace() {
-    $fixture= (new Functions())->with('testing', HelloWorld::class);
-    $fixture->target('unknown_hello');
+    (new Functions())->with('testing', HelloWorld::class)->target('unknown_hello');
   }
 
   #[Test, Expect(IllegalArgumentException::class)]
   public function unknown_method() {
-    $fixture= (new Functions())->with('testing', HelloWorld::class);
-    $fixture->target('testing_unknown');
+    (new Functions())->with('testing', HelloWorld::class)->target('testing_unknown');
   }
 }
