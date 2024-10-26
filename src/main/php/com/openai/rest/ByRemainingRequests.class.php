@@ -4,7 +4,9 @@
  * Distributes requests using the rate limits returned in the response headers
  * as weights for selecting the target.
  *
- * @test com.openai.unittest.ByRemainingRequestsTest
+ * @see   https://platform.openai.com/docs/guides/rate-limits
+ * @see   https://learn.microsoft.com/en-us/azure/ai-services/openai/quotas-limits
+ * @test  com.openai.unittest.ByRemainingRequestsTest
  */
 class ByRemainingRequests implements Distribution {
 
