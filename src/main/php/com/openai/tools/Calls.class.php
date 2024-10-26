@@ -86,7 +86,7 @@ class Calls {
    * @throws lang.IllegalArgumentException
    * @throws lang.reflect.TargetException
    */
-  public function invoke($name, $named, $context= []) {
+  public function invoke(string $name, array $named= [], array $context= []) {
     list($instance, $method)= $this->functions->target($name);
 
     $pass= [];
@@ -98,8 +98,9 @@ class Calls {
   }
 
   /**
-   * Call the function, including handling JSON de- and encoding and converting
-   * caught exceptions to a serializable form.
+   * Call the given function, including handling JSON de- and encoding and converting
+   * caught exceptions to a serializable form. This method is meant to be used directly
+   * by and for LLM function calling.
    */
   public function call(string $name, string $arguments, array $context= []): string {
     try {
