@@ -181,7 +181,7 @@ if ('tool_calls' === ($result['choices'][0]['finish_reason'] ?? null)) {
   $payload['messages'][]= $result['choices'][0]['message'];
   
   foreach ($result['choices'][0]['message']['tool_calls'] as $call) {
-    $return= $calls->invoke($call['function']['name'], $call['function']['arguments']);
+    $return= $calls->call($call['function']['name'], $call['function']['arguments']);
     $payload['messages'][]= [
       'role'         => 'tool',
       'tool_call_id' => $call['id'],

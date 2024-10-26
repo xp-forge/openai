@@ -220,7 +220,7 @@ class FunctionsTest {
   #[Test, Values([[[], 'Hello World'], [['name' => 'Test'], 'Hello Test']])]
   public function invoke($arguments, $expected) {
     $fixture= (new Functions())->with('testing', HelloWorld::class);
-    $result= $fixture->invoke('testing_hello', $arguments);
+    $result= $fixture->calls()->invoke('testing_hello', $arguments);
 
     Assert::equals($expected, $result);
   }
@@ -228,12 +228,12 @@ class FunctionsTest {
   #[Test, Expect(IllegalArgumentException::class)]
   public function unknown_namespace() {
     $fixture= (new Functions())->with('testing', HelloWorld::class);
-    $fixture->invoke('unknown_hello', []);
+    $fixture->target('unknown_hello');
   }
 
   #[Test, Expect(IllegalArgumentException::class)]
   public function unknown_method() {
     $fixture= (new Functions())->with('testing', HelloWorld::class);
-    $fixture->invoke('testing_unknown', []);
+    $fixture->target('testing_unknown');
   }
 }

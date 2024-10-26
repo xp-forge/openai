@@ -107,16 +107,13 @@ class Functions implements Value {
   public function calls() { return new Calls($this); }
 
   /**
-   * Invokes the given tool from a tool call
+   * Returns target for a given call
    *
    * @param  string $call
-   * @param  [:var] $arguments
-   * @param  [:var] $context
-   * @return var
-   * @throws lang.IllegalArgumentException
-   * @throws lang.reflection.TargetException
+   * @return var[]
+   * @throws lang.IllegalArgumentException if there is no such target registered
    */
-  public function invoke(string $call, array $arguments, array $context= []) {
+  public function target($call) {
     sscanf($call, "%[^_]_%[^\r]", $namespace, $name);
     if (null === ($method= $this->methods[$namespace][$name] ?? null)) {
       throw new IllegalArgumentException(isset($this->methods[$namespace])
@@ -125,28 +122,8 @@ class Functions implements Value {
       );
     }
 
-    // Lazily create instance
-    list(&$instance, $new)= $this->instances[$namespace];
-    $instance??= $new();
-
-    $pass= [];
-    foreach ($method->parameters() as $param => $reflect) {
-      if ($reflect->annotations()->provides(Context::class)) {
-        $ptr= &$context[$param];
-      } else {
-        $ptr= &$arguments[$param];
-      }
-
-      if (isset($ptr)) {
-        $pass[]= $ptr;
-      } else if ($reflect->optional()) {
-        $pass[]= $reflect->default();
-      } else {
-        throw new IllegalArgumentException("Missing argument {$param} for {$call}");
-      }
-    }
-
-    return $method->invoke($instance, $pass);
+    // Lazily create instance if not set
+    return [$this->instances[$namespace][0] ?? $this->instances[$namespace][1](), $method];
   }
 
   /** @return string */

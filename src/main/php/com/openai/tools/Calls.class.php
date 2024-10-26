@@ -1,8 +1,8 @@
 <?php namespace com\openai\tools;
 
 use Throwable as Any;
-use lang\Throwable;
 use lang\reflection\TargetException;
+use lang\{Throwable, IllegalArgumentException};
 
 /** @test com.openai.unittest.CallsTest */
 class Calls {
@@ -37,22 +37,55 @@ class Calls {
   }
 
   /**
-   * Invoke the function, including handling JSON de- and encoding
+   * Invoke the function with named arguments and a given context
+   *
+   * @param  string $name
+   * @param  [:var] $arguments
+   * @param  [:var] $context
+   * @return var
+   * @throws lang.IllegalArgumentException
+   * @throws lang.reflect.TargetException
+   */
+  public function invoke($name, $arguments, $context= []) {
+    list($instance, $method)= $this->functions->target($name);
+
+    $pass= [];
+    foreach ($method->parameters() as $param => $reflect) {
+      if ($reflect->annotations()->provides(Context::class)) {
+        $ptr= &$context;
+      } else {
+        $ptr= &$arguments;
+      }
+
+      if (array_key_exists($param, $ptr)) {
+        $pass[]= $ptr[$param];
+      } else if ($reflect->optional()) {
+        $pass[]= $reflect->default();
+      } else {
+        throw new IllegalArgumentException("Missing argument {$param} for {$name}");
+      }
+    }
+
+    return $method->invoke($instance, $pass);
+  }
+
+  /**
+   * Call the function, including handling JSON de- and encoding and converting
+   * caught exceptions to a serializable form.
    *
    * @param  string $name
    * @param  string $arguments
    * @param  [:var] $context
    * @return string
    */
-  public function invoke($name, $arguments, $context= []) {
+  public function call($name, $arguments, $context= []) {
     try {
-      $return= $this->functions->invoke($name, json_decode($arguments, true), $context);
+      $result= $this->invoke($name, json_decode($arguments, true), $context);
     } catch (TargetException $e) {
-      $return= $this->error($e->getCause());
+      $result= $this->error($e->getCause());
     } catch (Any $e) {
-      $return= $this->error(Throwable::wrap($e));
+      $result= $this->error(Throwable::wrap($e));
     }
-
-    return json_encode($return);
+    return json_encode($result);
   }
 }

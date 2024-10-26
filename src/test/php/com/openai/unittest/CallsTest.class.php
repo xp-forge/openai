@@ -2,7 +2,7 @@
 
 use com\openai\tools\{Functions, Calls};
 use lang\IllegalAccessException;
-use test\{Assert, Before, Test};
+use test\{Assert, Before, Test, Values};
 
 class CallsTest {
   private $functions;
@@ -28,10 +28,10 @@ class CallsTest {
   }
 
   #[Test]
-  public function invoke_successfully() {
+  public function call_successfully() {
     Assert::equals(
       '"Hello World"',
-      (new Calls($this->functions))->invoke('testing_greet', '{"name":"World"}')
+      (new Calls($this->functions))->call('testing_greet', '{"name":"World"}')
     );    
   }
 
@@ -39,15 +39,15 @@ class CallsTest {
   public function missing_argument() {
     Assert::equals(
       '{"error":"lang.IllegalArgumentException","message":"Missing argument name for testing_greet"}',
-      (new Calls($this->functions))->invoke('testing_greet', '{}')
+      (new Calls($this->functions))->call('testing_greet', '{}')
     );    
   }
 
-  #[Test]
-  public function target_error() {
+  #[Test, Values(['{"name":""}', '{"name":null}'])]
+  public function target_error($arguments) {
     Assert::equals(
       '{"error":"lang.IllegalAccessException","message":"Name may not be empty!"}',
-      (new Calls($this->functions))->invoke('testing_greet', '{"name":""}')
+      (new Calls($this->functions))->call('testing_greet', $arguments)
     );    
   }
 
@@ -56,7 +56,7 @@ class CallsTest {
     $caught= null;
     (new Calls($this->functions))
       ->catching(function($t) use(&$caught) { $caught= $t; })
-      ->invoke('testing_greet', '{"name":""}')
+      ->call('testing_greet', '{"name":""}')
     ;
 
     Assert::instance(IllegalAccessException::class, $caught);    
@@ -66,7 +66,7 @@ class CallsTest {
   public function modifying_error() {
     $result= (new Calls($this->functions))
       ->catching(fn($t) => ['error' => $t->getMessage()])
-      ->invoke('testing_greet', '{"name":""}')
+      ->call('testing_greet', '{"name":""}')
     ;
 
     Assert::equals('{"error":"Name may not be empty!"}', $result);
