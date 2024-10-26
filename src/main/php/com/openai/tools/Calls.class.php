@@ -3,6 +3,7 @@
 use Throwable as Any;
 use lang\reflection\TargetException;
 use lang\{Type, Throwable, IllegalArgumentException};
+use text\json\Json;
 use util\data\Marshalling;
 
 /**
@@ -109,9 +110,8 @@ class Calls {
     try {
       list($instance, $method)= $this->functions->target($name);
 
-      $named= json_decode($arguments, null, 512, JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
       $pass= [];
-      foreach ($this->pass($method, $named, $context) as $type => $value) {
+      foreach ($this->pass($method, Json::read($arguments), $context) as $type => $value) {
         $pass[]= $this->marshalling->unmarshal($value, $type);
       }
       
@@ -122,6 +122,6 @@ class Calls {
       $result= $this->error(Throwable::wrap($e));
     }
 
-    return json_encode($result);
+    return Json::of($result);
   }
 }
