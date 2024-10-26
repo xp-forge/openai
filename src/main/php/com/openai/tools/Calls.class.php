@@ -54,17 +54,13 @@ class Calls {
       $annotations= $reflect->annotations();
       if ($annotation= $annotations->type(Context::class)) {
         $ptr= &$context;
-        $annotated= $annotation->arguments();
-      } else if ($annotation= $annotations->type(Param::class)) {
-        $ptr= &$arguments;
-        $annotated= $annotation->arguments();
+        $named= $annotation->argument('name') ?? $annotation->argument(0) ?? $param;
       } else {
         $ptr= &$arguments;
-        $annotated= [];
+        $named= $param;
       }
 
       // Support NULL inside context or arguments
-      $named= $annotated['name'] ?? $annotated[0] ?? $param;
       if (array_key_exists($named, $ptr)) {
         $pass[]= $ptr[$named];
       } else if ($reflect->optional()) {
