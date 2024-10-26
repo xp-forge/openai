@@ -55,6 +55,14 @@ class ByRemainingRequestsTest {
   }
 
   #[Test]
+  public function chooses_randomly_if_ratelimit_zero() {
+    $a= $this->testingEndpoint(0);
+    $b= $this->testingEndpoint(0);
+
+    Assert::true(in_array($this->fixture->distribute([$a, $b]), [$a, $b], true));
+  }
+
+  #[Test]
   public function invokes_endpoint_with_most_remaining_requests() {
     $a= $this->testingEndpoint(1000);
     $b= $this->testingEndpoint(997);
