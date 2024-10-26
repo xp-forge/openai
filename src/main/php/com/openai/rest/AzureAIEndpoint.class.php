@@ -11,8 +11,8 @@ use webservices\rest\Endpoint;
  * @test com.openai.unittest.AzureAIEndpointTest
  */
 class AzureAIEndpoint extends ApiEndpoint {
-  private $endpoint;
-  public $version, $rateLimit;
+  private $endpoint, $rateLimit;
+  public $version;
 
   /**
    * Creates a new OpenAI endpoint
@@ -31,6 +31,9 @@ class AzureAIEndpoint extends ApiEndpoint {
     }
     $this->rateLimit= new RateLimit();
   }
+
+  /** Returns rate limit */
+  public function rateLimit(): RateLimit { return $this->rateLimit; }
 
   /** @return [:var] */
   public function headers() { return $this->endpoint->headers(); }

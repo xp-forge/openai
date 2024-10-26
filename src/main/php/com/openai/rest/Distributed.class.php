@@ -5,25 +5,36 @@ use util\Objects;
 
 /**
  * Supports distributing requests over multiple endpoints to increase
- * performance, using the rate limits returned in the response headers
- * as weights for selecting the target.
+ * performance, using a given distribution strategy to select target
+ * endpoints.
  *
  * @test  com.openai.unittest.DistributedTest
  */
 class Distributed extends ApiEndpoint {
-  private $endpoints;
+  private $endpoints, $distribution;
 
   /**
    * Creates a new distributed endpoint from a list of endpoints
    *
    * @param  com.openai.rest.ApiEndpoint[] $endpoints
+   * @param  com.openai.rest.Distribution $distribution
    * @throws lang.IllegalArgumentException;
    */
-  public function __construct(array $endpoints) {
+  public function __construct(array $endpoints, Distribution $distribution) {
     if (empty($endpoints)) {
       throw new IllegalArgumentException('Endpoints cannot be empty');
     }
     $this->endpoints= $endpoints;
+    $this->distribution= $distribution;
+  }
+
+  /** Returns rate limit */
+  public function rateLimit(): RateLimit {
+    $r= new RateLimit();
+    foreach ($this->endpoints as $endpoint) {
+      $r->remaining+= $endpoint->rateLimit()->remaining;
+    }
+    return $r;
   }
 
   /**
@@ -37,34 +48,9 @@ class Distributed extends ApiEndpoint {
     }
   }
 
-  /** Distributes API calls */
-  public function distribute(): ApiEndpoint {
-    $max= 0;
-    $most= null;
-    $candidates= [];
-    foreach ($this->endpoints as $i => $endpoint) {
-      if (null === $endpoint->rateLimit->remaining) {
-        $candidates[]= $endpoint;
-      } else if ($endpoint->rateLimit->remaining > $max) {
-        $most= $endpoint;
-        $max= $endpoint->rateLimit->remaining;
-      }
-    }
-
-    // Select between the one with the most remaining requests, including any
-    // unlimited ones, and fall back to a random endpoint.
-    if ($most) {
-      $candidates[]= $most;
-    } else if (empty($candidates)) {
-      $candidates= $this->endpoints;
-    }
-
-    return $candidates[rand(0, sizeof($candidates) - 1)];
-  }
-
   /** Distributes request and returns an API */
   public function api(string $path, array $segments= []): Api {
-    return $this->distribute()->api($path, $segments);
+    return $this->distribution->distribute($this->endpoints)->api($path, $segments);
   }
 
   /** @return string */
