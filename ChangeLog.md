@@ -3,6 +3,11 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Merged PR #12: Wrap function calling in `Calls` API. This simplifies
+  function calling by handling JSON de- and encoding as well as supplying
+  a default error handling mechanism
+  (@thekid)
+
 ## 0.4.0 / 2024-10-26
 
 * Merged PR #11: Add distribution strategy and the `ByRemainingRequests`
