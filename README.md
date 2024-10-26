@@ -201,7 +201,7 @@ Console::writeLine($result);
 Functions can be passed a context as follows by annotating parameters with the *Context* annotation:
 
 ```php
-use com\mongodb\{Collection, Document};
+use com\mongodb\{Collection, Document, ObjectId};
 use com\openai\tools\{Context, Param};
 
 // Declaration
@@ -209,7 +209,7 @@ class Memory {
 
   public function __construct(private Collection $facts) { }
 
-  public function store(#[Context] Document $user, #[Param] string $fact) {
+  public function store(#[Context] Document $user, #[Param] string $fact): ObjectId {
     return $this->facts->insert(new Document(['owner' => $user->id(), 'fact' => $fact]))->id();
   }
 }
