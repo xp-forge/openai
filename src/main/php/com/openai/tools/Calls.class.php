@@ -80,7 +80,7 @@ class Calls {
    */
   public function call($name, $arguments, $context= []) {
     try {
-      $result= $this->invoke($name, json_decode($arguments, true), $context);
+      $result= $this->invoke($name, json_decode($arguments, null, 512, JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR), $context);
     } catch (TargetException $e) {
       $result= $this->error($e->getCause());
     } catch (Any $e) {

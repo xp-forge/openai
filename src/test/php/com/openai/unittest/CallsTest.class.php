@@ -48,12 +48,20 @@ class CallsTest {
     );    
   }
 
+  #[Test]
+  public function call_invalid_json() {
+    Assert::equals(
+      '{"error":"lang.Error","message":"Control character error, possibly incorrectly encoded"}',
+      (new Calls($this->functions))->call('testing_greet', '{"unclosed')
+    );
+  }
+
   #[Test, Values(['{"name":""}', '{"name":null}'])]
   public function call_converts_errors_from($arguments) {
     Assert::equals(
       '{"error":"lang.IllegalAccessException","message":"Name may not be empty!"}',
       (new Calls($this->functions))->call('testing_greet', $arguments)
-    );    
+    );
   }
 
   #[Test]
