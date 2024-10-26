@@ -1,8 +1,8 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\tools\{Functions, Calls};
-use lang\IllegalAccessException;
-use test\{Assert, Before, Test, Values};
+use lang\{IllegalAccessException, IllegalArgumentException};
+use test\{Assert, Before, Expect, Test, Values};
 
 class CallsTest {
   private $functions;
@@ -28,6 +28,19 @@ class CallsTest {
   }
 
   #[Test]
+  public function invoke_successfully() {
+    Assert::equals(
+      'Hello World',
+      (new Calls($this->functions))->invoke('testing_greet', ['name' => 'World'])
+    );    
+  }
+
+  #[Test, Expect(class: IllegalArgumentException::class, message: 'Missing argument name for testing_greet')]
+  public function missing_argument() {
+    (new Calls($this->functions))->invoke('testing_greet', []);
+  }
+
+  #[Test]
   public function call_successfully() {
     Assert::equals(
       '"Hello World"',
@@ -35,16 +48,8 @@ class CallsTest {
     );    
   }
 
-  #[Test]
-  public function missing_argument() {
-    Assert::equals(
-      '{"error":"lang.IllegalArgumentException","message":"Missing argument name for testing_greet"}',
-      (new Calls($this->functions))->call('testing_greet', '{}')
-    );    
-  }
-
   #[Test, Values(['{"name":""}', '{"name":null}'])]
-  public function target_error($arguments) {
+  public function call_converts_errors_from($arguments) {
     Assert::equals(
       '{"error":"lang.IllegalAccessException","message":"Name may not be empty!"}',
       (new Calls($this->functions))->call('testing_greet', $arguments)
