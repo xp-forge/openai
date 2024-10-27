@@ -1,9 +1,15 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\realtime\RealtimeApi;
-use test\{Assert, Test};
+use test\{Assert, Test, Values};
 
 class RealtimeApiTest {
+
+  /** Returns authentications */
+  private function authentications(): iterable {
+    yield ['azure', ['api-key' => 'test']];
+    yield ['openai', ['Authorization' => 'Bearer test', 'OpenAI-Beta' => 'realtime=v1']];
+  }
 
   #[Test]
   public function can_create() {
@@ -23,6 +29,16 @@ class RealtimeApiTest {
     $c->connect();
 
     Assert::true($c->connected());
+  }
+
+  #[Test, Values(from: 'authentications')]
+  public function passing_headers($kind, $headers) {
+    $s= new TestingSocket();
+
+    $c= new RealtimeApi($s);
+    $c->connect($headers);
+
+    Assert::equals($headers, $s->connected);
   }
 
   #[Test]

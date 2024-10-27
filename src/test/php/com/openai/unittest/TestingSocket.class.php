@@ -5,7 +5,7 @@ use websocket\WebSocket;
 
 class TestingSocket extends WebSocket {
   private $messages;
-  private $connected= null;
+  public $connected= null;
 
   public function __construct($messages= []) {
     $this->messages= $messages;

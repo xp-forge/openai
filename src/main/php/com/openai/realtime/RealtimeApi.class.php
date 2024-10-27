@@ -15,18 +15,15 @@ use websocket\WebSocket;
  * @see   https://platform.openai.com/docs/guides/realtime
  */
 class RealtimeApi implements Traceable {
-  private $ws, $headers, $marshalling;
+  private $ws, $marshalling;
   private $cat= null;
 
   /** @param string|util.URI|websocket.WebSocket $endpoint */
   public function __construct($endpoint) {
     if ($endpoint instanceof WebSocket) {
       $this->ws= $endpoint;
-      $this->headers= [];
     } else {
-      $uri= $endpoint instanceof URI ? $endpoint : new URI($endpoint);
-      $this->ws= new WebSocket($uri);
-      $this->headers= ['api-key' => $uri->user()];
+      $this->ws= new WebSocket((string)$endpoint);
     }
     $this->marshalling= new Marshalling();
   }
@@ -38,7 +35,6 @@ class RealtimeApi implements Traceable {
 
   /** Opens the underlying websocket, optionally passing headers */
   public function connect(array $headers= []): self {
-    $headers+= $this->headers;
     $this->cat && $this->cat->info($this->ws->socket(), $this->ws->path(), $headers);
     $this->ws->connect($headers);
     return $this;
