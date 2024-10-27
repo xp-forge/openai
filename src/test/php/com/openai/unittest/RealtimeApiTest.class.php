@@ -1,9 +1,11 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\realtime\RealtimeApi;
-use test\{Assert, Test, Values};
+use lang\IllegalStateException;
+use test\{Assert, Expect, Test, Values};
 
 class RealtimeApiTest {
+  const SESSION_CREATED= '{"type": "session.created"}';
 
   /** Returns authentications */
   private function authentications(): iterable {
@@ -25,7 +27,7 @@ class RealtimeApiTest {
 
   #[Test]
   public function connect() {
-    $c= new RealtimeApi(new TestingSocket());
+    $c= new RealtimeApi(new TestingSocket([self::SESSION_CREATED]));
     $c->connect();
 
     Assert::true($c->connected());
@@ -33,7 +35,7 @@ class RealtimeApiTest {
 
   #[Test, Values(from: 'authentications')]
   public function passing_headers($kind, $headers) {
-    $s= new TestingSocket();
+    $s= new TestingSocket([self::SESSION_CREATED]);
 
     $c= new RealtimeApi($s);
     $c->connect($headers);
@@ -43,7 +45,7 @@ class RealtimeApiTest {
 
   #[Test]
   public function close() {
-    $c= new RealtimeApi(new TestingSocket());
+    $c= new RealtimeApi(new TestingSocket([self::SESSION_CREATED]));
     $c->connect();
     $c->close();
 
@@ -52,23 +54,26 @@ class RealtimeApiTest {
 
   #[Test]
   public function initial_handshake() {
-    $c= new RealtimeApi(new TestingSocket([
-      '{"type": "session.created"}',
-    ]));
-    $c->connect();
+    $c= new RealtimeApi(new TestingSocket([self::SESSION_CREATED]));
+    $session= $c->connect();
 
-    Assert::equals(['type' => 'session.created'], $c->receive());
+    Assert::equals(['type' => 'session.created'], $session);
+  }
+
+  #[Test, Expect(class: IllegalStateException::class, message: 'Unexpected handshake event "error"')]
+  public function unexpected_handshake() {
+    $c= new RealtimeApi(new TestingSocket(['{"type":"error"}']));
+    $c->connect();
   }
 
   #[Test]
   public function update_session() {
     $c= new RealtimeApi(new TestingSocket([
-      '{"type": "session.created"}',
+      self::SESSION_CREATED,
       '{"type": "session.update", "session": {"instructions": "You are TestGPT"}}',
       '{"type": "session.updated"}',
     ]));
     $c->connect();
-    $c->receive();
     $c->send(['type' => 'session.update', 'session' => ['instructions' => 'You are TestGPT']]);
 
     Assert::equals(['type' => 'session.updated'], $c->receive());
@@ -77,12 +82,11 @@ class RealtimeApiTest {
   #[Test]
   public function transmit() {
     $c= new RealtimeApi(new TestingSocket([
-      '{"type": "session.created"}',
+      self::SESSION_CREATED,
       '{"type": "conversation.item.create", "item": {"type": "message"}}',
       '{"type": "conversation.item.created"}',
     ]));
     $c->connect();
-    $c->receive();
     $response= $c->transmit(['type' => 'conversation.item.create', 'item' => ['type' => 'message']]);
 
     Assert::equals(['type' => 'conversation.item.created'], $response);

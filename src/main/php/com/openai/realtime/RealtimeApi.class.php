@@ -1,9 +1,10 @@
 <?php namespace com\openai\realtime;
 
+use lang\IllegalStateException;
 use text\json\Json;
-use util\URI;
 use util\data\Marshalling;
 use util\log\Traceable;
+use util\URI;
 use websocket\WebSocket;
 
 /**
@@ -29,11 +30,26 @@ class RealtimeApi implements Traceable {
     $this->cat= $cat;
   }
 
-  /** Opens the underlying websocket, optionally passing headers */
-  public function connect(array $headers= []): self {
+  /**
+   * Opens the underlying websocket, optionally passing headers
+   *
+   * Verifies a `session.created` event is received. This is sent by the server
+   * as soon as the connection is successfully established. Provides a connection-
+   * specific ID that may be useful for debugging or logging.
+   *
+   * @return var
+   * @throws lang.IllegalStateException
+   */
+  public function connect(array $headers= []) {
     $this->cat && $this->cat->info($this->ws->socket(), $this->ws->path(), $headers);
     $this->ws->connect($headers);
-    return $this;
+
+    $event= $this->receive();
+    if ('session.created' === ($event['type'] ?? null)) return $event;
+
+    $error= 'Unexpected handshake event "'.($event['type'] ?? '(null)').'"';
+    $this->ws->close(4007, $error);
+    throw new IllegalStateException($error);
   }
 
   /** Returns whether the underlying websocket is connected */
