@@ -109,14 +109,13 @@ To convert audio into text, upload files via the API's *upload()* method, which 
 use com\openai\rest\OpenAIEndpoint;
 use io\File;
 use util\cmd\Console;
-use util\MimeType;
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $file= new File($argv[1]);
 
 $response= $ai->api('/audio/transcriptions')
   ->open(['model', 'whisper-1'])
-  ->transfer('file', $file->in(), $file->filename, MimeType::getByFileName($file->filename))
+  ->transfer('file', $file->in(), $file->filename)
   ->finish()
 ;
 Console::writeLine($response->value());
