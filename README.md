@@ -121,6 +121,22 @@ $response= $ai->api('/audio/transcriptions')
 Console::writeLine($response->value());
 ```
 
+You can also stream uploads from *InputStream*s as follows:
+
+```php
+// ...setup code from above...
+
+$upload= $ai->api('/audio/transcriptions')->open(['model', 'whisper-1']);
+
+$stream= $upload->stream('file', 'audio.mp3');
+while ($in->available()) {
+  $stream->write($in->read());
+}
+$response= $upload->finish();
+
+Console::writeLine($response->value());
+
+
 Tracing the calls
 -----------------
 REST API calls can be traced with the [logging library](https://github.com/xp-framework/logging):
