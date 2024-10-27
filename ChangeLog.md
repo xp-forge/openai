@@ -3,7 +3,7 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
-## 0.6.0 / ????-??-??
+## 0.6.0 / 2024-10-27
 
 * Merged PR #9: Support uploading files, e.g. for transcribing audio.
   (@thekid)
