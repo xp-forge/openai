@@ -3,6 +3,11 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.6.0 / ????-??-??
+
+* Merged PR #9: Support uploading files, e.g. for transcribing audio.
+  (@thekid)
+
 ## 0.5.0 / 2024-10-26
 
 * Merged PR #13: Use marshalling for function calls. This way functions
