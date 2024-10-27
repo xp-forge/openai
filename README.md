@@ -115,8 +115,7 @@ $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1'
 $file= new File($argv[1]);
 
 $response= $ai->api('/audio/transcriptions')
-  ->upload()
-  ->pass('model', 'whisper-1')
+  ->open(['model', 'whisper-1'])
   ->transfer('file', $file->in(), $file->filename, MimeType::getByFileName($file->filename))
   ->finish()
 ;

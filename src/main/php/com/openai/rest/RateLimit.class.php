@@ -6,6 +6,11 @@ use lang\Value;
 class RateLimit implements Value {
   public $remaining= null;
 
+  /** Update rate limit if header is present */
+  public function update(?int $remaining): void {
+    null === $remaining || $this->remaining= $remaining;
+  }
+
   /** @return string */
   public function toString() {
     return nameof($this).'(remaining: '.(null === $this->remaining ? '(n/a)' : $this->remaining).')';

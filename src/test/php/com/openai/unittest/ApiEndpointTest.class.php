@@ -64,7 +64,7 @@ abstract class ApiEndpointTest {
   public function upload() {
     $endpoint= $this->fixture($this->testingEndpoint());
     Assert::equals('Test', $endpoint->api('/audio/transcriptions')
-      ->upload()
+      ->open(['model' => 'whisper-1'])
       ->transfer('file', new MemoryInputStream("\xf3\xff..."), 'test.mp3', 'audio/mp3')
       ->finish()
       ->value()
