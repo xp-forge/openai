@@ -103,7 +103,7 @@ while ($stream->available()) {
 
 Speech to text
 --------------
-To convert audio into text, upload files via the API's *upload()* method, which returns an upload instance. See https://platform.openai.com/docs/guides/speech-to-text/overview
+To convert audio into text, upload files via the API's *open()* method, which returns an *Upload* instance. See https://platform.openai.com/docs/guides/speech-to-text/overview
 
 ```php
 use com\openai\rest\OpenAIEndpoint;
