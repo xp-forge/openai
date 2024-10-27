@@ -214,7 +214,8 @@ class Memory {
   }
 }
 
-// Pass the context to the call() method
+// ...shortened for brevity...
+
 $context= ['user' => $user];
 $return= $calls->call($call['function']['name'], $call['function']['arguments'], $context);
 ```
