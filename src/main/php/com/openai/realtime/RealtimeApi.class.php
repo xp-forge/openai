@@ -20,11 +20,7 @@ class RealtimeApi implements Traceable {
 
   /** @param string|util.URI|websocket.WebSocket $endpoint */
   public function __construct($endpoint) {
-    if ($endpoint instanceof WebSocket) {
-      $this->ws= $endpoint;
-    } else {
-      $this->ws= new WebSocket((string)$endpoint);
-    }
+    $this->ws= $endpoint instanceof WebSocket ? $endpoint : new WebSocket((string)$endpoint);
     $this->marshalling= new Marshalling();
   }
 
