@@ -1,6 +1,6 @@
 <?php namespace com\openai\rest;
 
-use webservices\rest\{RestResource, RestResponse, UnexpectedStatus};
+use webservices\rest\{RestResource, RestResponse, RestUpload, UnexpectedStatus};
 
 class Api {
   const JSON= 'application/json';
@@ -24,15 +24,24 @@ class Api {
    */
   public function transmit($payload, $mime= self::JSON): RestResponse {
     $r= $this->resource->post($payload, $mime);
-
-    // Update rate limit if header is present
-    if (null !== ($remaining= $r->header('x-ratelimit-remaining-requests'))) {
-      $this->rateLimit->remaining= (int)$remaining;
-    }
-
+    $this->rateLimit->update($r->header('x-ratelimit-remaining-requests'));
     if (200 === $r->status()) return $r;
 
     throw new UnexpectedStatus($r);
+  }
+
+  /**
+   * Starts an upload
+   *
+   * @param  [:string] $params
+   * @return com.openai.rest.Upload
+   */
+  public function open($params= []): Upload {
+    $upload= $this->resource->upload('POST');
+    foreach ($params as $name => $value) {
+      $upload->pass($name, $value);
+    }
+    return new Upload($upload, $this->rateLimit);
   }
 
   /** Invokes API and returns result */

@@ -1,6 +1,6 @@
 <?php namespace com\openai\unittest;
 
-use io\streams\Streams;
+use io\streams\{Streams, MemoryInputStream};
 use test\{Assert, Expect, Test};
 use webservices\rest\{TestEndpoint, UnexpectedStatus};
 
@@ -12,6 +12,9 @@ abstract class ApiEndpointTest {
   /** Returns a testing API endpoint */
   private function testingEndpoint(): TestEndpoint {
     return new TestEndpoint([
+      'POST /audio/transcriptions' => function($call) {
+        return $call->respond(200, 'OK', ['Content-Type' => 'application/json'], '"Test"');
+      },
       'POST /chat/completions' => function($call) {
         if ($call->request()->payload()->value()['stream'] ?? false) {
           $headers= ['Content-Type' => 'text/event-stream'];
@@ -54,6 +57,17 @@ abstract class ApiEndpointTest {
     Assert::equals(
       '{"choices":[{"message":{"role":"assistant","content":"Test"}}]}',
       Streams::readAll($endpoint->api('/chat/completions')->transmit([])->stream())
+    );
+  }
+
+  #[Test]
+  public function upload() {
+    $endpoint= $this->fixture($this->testingEndpoint());
+    Assert::equals('Test', $endpoint->api('/audio/transcriptions')
+      ->open(['model' => 'whisper-1'])
+      ->transfer('file', new MemoryInputStream("\xf3\xff..."), 'test.mp3', 'audio/mp3')
+      ->finish()
+      ->value()
     );
   }
 

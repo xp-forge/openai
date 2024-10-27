@@ -69,8 +69,8 @@ Embeddings
 To create an embedding for a given text, use https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
 
 ```php
-use util\cmd\Console;
 use com\openai\rest\OpenAIEndpoint;
+use util\cmd\Console;
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 
@@ -85,8 +85,8 @@ Text to speech
 To stream generate audio, use the API's *transmit()* method, which sends the given payload and returns the response. See https://platform.openai.com/docs/guides/text-to-speech/overview
 
 ```php
-use util\cmd\Console;
 use com\openai\rest\OpenAIEndpoint;
+use util\cmd\Console;
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $payload= [
@@ -99,6 +99,27 @@ $stream= $ai->api('/audio/speech')->transmit($payload)->stream();
 while ($stream->available()) {
   Console::write($stream->read());
 }
+```
+
+Speech to text
+--------------
+To convert audio into text, upload files via the API's *upload()* method, which returns an upload instance. See https://platform.openai.com/docs/guides/speech-to-text/overview
+
+```php
+use com\openai\rest\OpenAIEndpoint;
+use io\File;
+use util\cmd\Console;
+use util\MimeType;
+
+$ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
+$file= new File($argv[1]);
+
+$response= $ai->api('/audio/transcriptions')
+  ->open(['model', 'whisper-1'])
+  ->transfer('file', $file->in(), $file->filename, MimeType::getByFileName($file->filename))
+  ->finish()
+;
+Console::writeLine($response->value());
 ```
 
 Tracing the calls
