@@ -3,6 +3,29 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.5.0 / 2024-10-26
+
+* Merged PR #13: Use marshalling for function calls. This way functions
+  can have their arguments converted from and return values converted 
+  to JSON primitives 
+  (@thekid)
+* Merged PR #12: Wrap function calling in `Calls` API. This simplifies
+  function calling by handling JSON de- and encoding as well as supplying
+  a default error handling mechanism
+  (@thekid)
+
+## 0.4.0 / 2024-10-26
+
+* Merged PR #11: Add distribution strategy and the `ByRemainingRequests`
+  implementation
+  (@thekid)
+
+## 0.3.0 / 2024-10-22
+
+* Merged PR #10: Add endpoint implementation which will distribute API
+  requests based on rate limits; see also #7
+  (@thekid)
+
 ## 0.2.0 / 2024-10-20
 
 * Included usage in streaming responses using `{"include_usage": true}`,

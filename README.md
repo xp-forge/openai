@@ -188,14 +188,14 @@ $payload= [
 
 ### Invoking custom functions
 
-If tool calls are requested by the LLM, invoke them and return to next completion cycle. Arguments and return values are encoded as *JSON*. See https://platform.openai.com/docs/guides/function-calling/configuring-parallel-function-calling
+If tool calls are requested by the LLM, invoke them and return to next completion cycle. See https://platform.openai.com/docs/guides/function-calling/configuring-parallel-function-calling
 
 ```php
-use lang\Throwable;
 use util\cmd\Console;
 
 // ...setup code from above...
 
+$calls= $functions->calls()->catching(fn($t) => $t->printStackTrace());
 complete: $result= $ai->api('/chat/completions')->invoke($payload));
 
 // If tool calls are requested, invoke them and return to next completion cycle
@@ -203,20 +203,11 @@ if ('tool_calls' === ($result['choices'][0]['finish_reason'] ?? null)) {
   $payload['messages'][]= $result['choices'][0]['message'];
   
   foreach ($result['choices'][0]['message']['tool_calls'] as $call) {
-    try {
-      $return= $functions->invoke(
-        $call['function']['name'],
-        json_decode($call['function']['arguments'], true)
-      );
-    } catch (Throwable $t) {
-      $t->printStackTrace();
-      $return= ['error' => $t->compoundMessage()];
-    }
-
+    $return= $calls->call($call['function']['name'], $call['function']['arguments']);
     $payload['messages'][]= [
       'role'         => 'tool',
       'tool_call_id' => $call['id'],
-      'content'      => json_encode($return),
+      'content'      => $return,
     ];
   }
 
@@ -225,6 +216,30 @@ if ('tool_calls' === ($result['choices'][0]['finish_reason'] ?? null)) {
 
 // Print out final result
 Console::writeLine($result);
+```
+
+### Passing context
+
+Functions can be passed a context as follows by annotating parameters with the *Context* annotation:
+
+```php
+use com\mongodb\{Collection, Document, ObjectId};
+use com\openai\tools\{Context, Param};
+
+// Declaration
+class Memory {
+
+  public function __construct(private Collection $facts) { }
+
+  public function store(#[Context] Document $user, #[Param] string $fact): ObjectId {
+    return $this->facts->insert(new Document(['owner' => $user->id(), 'fact' => $fact]))->id();
+  }
+}
+
+// ...shortened for brevity...
+
+$context= ['user' => $user];
+$return= $calls->call($call['function']['name'], $call['function']['arguments'], $context);
 ```
 
 Azure OpenAI
@@ -247,6 +262,33 @@ $payload= [
 Console::writeLine($ai->api('/chat/completions')->invoke($payload));
 ```
 
+Distributing requests
+---------------------
+The *Distributed* endpoint allows to distribute requests over multiple endpoints. The *ByRemainingRequests* class uses the `x-ratelimit-remaining-requests` header to determine the target. See https://platform.openai.com/docs/guides/rate-limits
+
+```php
+use com\openai\rest\{AzureAIEndpoint, Distributed, ByRemainingRequests};
+use util\cmd\Console;
+
+$endpoints= [
+  new AzureAIEndpoint('https://...@r1.openai.azure.com/openai/deployments/mini', '2024-02-01'),
+  new AzureAIEndpoint('https://...@r2.openai.azure.com/openai/deployments/mini', '2024-02-01'),
+];
+
+$ai= new Distributed($endpoints, new ByRemainingRequests());
+$payload= [
+  'model'    => 'gpt-4o-mini',
+  'messages' => [['role' => 'user', 'content' => $prompt]],
+];
+
+Console::writeLine($ai->api('/chat/completions')->invoke($payload));
+foreach ($endpoints as $i => $endpoint) {
+  Console::writeLine('Endpoint #', $i, ': ', $endpoint->rateLimit());
+}
+```
+
+For more complex load balancing, have a look at [this blog article using Azure API management](https://techcommunity.microsoft.com/t5/apps-on-azure-blog/openai-at-scale-maximizing-api-management-through-effective/ba-p/4240317)
+
 Realtime API
 ------------
 *Coming soon*
@@ -255,3 +297,4 @@ See also
 --------
 * https://github.com/openai/tiktoken/
 * https://github.com/openai/openai-python
+* https://github.com/Azure-Samples/azure-openai-reverse-proxy

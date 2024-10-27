@@ -6,11 +6,12 @@ class Api {
   const JSON= 'application/json';
   const STREAMING= ['stream' => true, 'stream_options' => ['include_usage' => true]];
 
-  private $resource;
+  private $resource, $rateLimit;
 
   /** Creates a new API instance from a given REST resource */
-  public function __construct(RestResource $resource) {
+  public function __construct(RestResource $resource, RateLimit $rateLimit) {
     $this->resource= $resource;
+    $this->rateLimit= $rateLimit;
   }
 
   /**
@@ -23,6 +24,12 @@ class Api {
    */
   public function transmit($payload, $mime= self::JSON): RestResponse {
     $r= $this->resource->post($payload, $mime);
+
+    // Update rate limit if header is present
+    if (null !== ($remaining= $r->header('x-ratelimit-remaining-requests'))) {
+      $this->rateLimit->remaining= (int)$remaining;
+    }
+
     if (200 === $r->status()) return $r;
 
     throw new UnexpectedStatus($r);
