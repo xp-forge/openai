@@ -6,16 +6,28 @@ use util\data\Marshalling;
 use util\log\Traceable;
 use websocket\WebSocket;
 
-/** @see https://github.com/azure-samples/aoai-realtime-audio-sdk */
+/**
+ * OpenAI Realtime API enables you to build low-latency, multi-modal conversational
+ * experiences. It currently supports text and audio as both input and output, as
+ * well as function calling.
+ *
+ * @test  com.openai.unittest.RealtimeApiTest
+ * @see   https://platform.openai.com/docs/guides/realtime
+ */
 class RealtimeApi implements Traceable {
-  private $ws, $headers;
+  private $ws, $headers, $marshalling;
   private $cat= null;
 
-  /** @param string|util.URI $endpoint */
+  /** @param string|util.URI|websocket.WebSocket $endpoint */
   public function __construct($endpoint) {
-    $uri= $endpoint instanceof URI ? $endpoint : new URI($endpoint);
-    $this->ws= new WebSocket($uri);
-    $this->headers= ['api-key' => $uri->user()];
+    if ($endpoint instanceof WebSocket) {
+      $this->ws= $endpoint;
+      $this->headers= [];
+    } else {
+      $uri= $endpoint instanceof URI ? $endpoint : new URI($endpoint);
+      $this->ws= new WebSocket($uri);
+      $this->headers= ['api-key' => $uri->user()];
+    }
     $this->marshalling= new Marshalling();
   }
 
