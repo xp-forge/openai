@@ -19,20 +19,7 @@ class Tools {
    */
   public function __construct(...$selected) {
     foreach ($selected as $select) {
-      if ($select instanceof Functions) {
-        foreach ($select->schema() as $name => $function) {
-          $this->selection[]= ['type' => 'function', 'function' => [
-            'name'        => $name,
-            'description' => $function['description'],
-            'parameters'  => $function['input'],
-          ]];
-        }
-      } else {
-        $this->selection[]= is_string($select) ? ['type' => $select] : $select;
-      }
+      $this->selection[]= is_string($select) ? ['type' => $select] : $select;
     }
   }
-
-  /** @return var */
-  public function __serialize() { return $this->selection; }
 }
