@@ -10,8 +10,7 @@ use webservices\rest\Endpoint;
  *
  * @test com.openai.unittest.AzureAIEndpointTest
  */
-class AzureAIEndpoint extends ApiEndpoint {
-  private $endpoint, $rateLimit;
+class AzureAIEndpoint extends RestEndpoint {
   public $version;
 
   /**
@@ -22,29 +21,13 @@ class AzureAIEndpoint extends ApiEndpoint {
    */
   public function __construct($arg, $version= null) {
     if ($arg instanceof Endpoint) {
-      $this->endpoint= $arg;
       $this->version= $version;
+      parent::__construct($arg);
     } else {
       $uri= $arg instanceof URI ? $arg : new URI($arg);
       $this->version= $version ?? $uri->param('api-version');
-      $this->endpoint= (new Endpoint($uri))->with(['Authorization' => null, 'API-Key' => $uri->user()]);
+      parent::__construct((new Endpoint($uri))->with(['Authorization' => null, 'API-Key' => $uri->user()]));
     }
-    $this->rateLimit= new RateLimit();
-  }
-
-  /** Returns rate limit */
-  public function rateLimit(): RateLimit { return $this->rateLimit; }
-
-  /** @return [:var] */
-  public function headers() { return $this->endpoint->headers(); }
-
-  /**
-   * Provides a log category for tracing requests
-   *
-   * @param  ?util.log.LogCategory $cat
-   */
-  public function setTrace($cat) {
-    $this->endpoint->setTrace($cat);
   }
 
   /** Returns an API */
