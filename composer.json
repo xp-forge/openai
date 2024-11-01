@@ -11,6 +11,7 @@
     "xp-framework/reflection": "^3.0 | ^2.0",
     "xp-forge/marshalling": "^2.0 | ^1.0",
     "xp-forge/rest-client": "^5.6",
+    "xp-forge/websockets": "^4.0",
     "php" : ">=7.4.0"
   },
   "require-dev" : {
