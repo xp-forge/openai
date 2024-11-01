@@ -3,8 +3,11 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
-## 0.7.0 / ????-??-??
+## 0.7.0 / 2024-11-01
 
+* Merged PR #16: Refactor implementation to unify tools usage for REST
+  and realtime APIs
+  (@thekid)
 * Merged PR #15: Implement realtime API. This implements issue #8 in a
   new `com.openai.realtime` package
   (@thekid)
