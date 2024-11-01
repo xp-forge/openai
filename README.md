@@ -305,7 +305,38 @@ For more complex load balancing, have a look at [this blog article using Azure A
 
 Realtime API
 ------------
-*Coming soon*
+The realtime API allows streaming audio and/or text to and from language models, see https://platform.openai.com/docs/guides/realtime
+
+```php
+use com\openai\realtime\RealtimeApi;
+use util\cmd\Console;
+
+$api= new RealtimeApi('wss://example.openai.azure.com/openai/realtime?'.
+  '?api-version=2024-10-01-preview'.
+  '&deployment=gpt-4o-realtime-preview'
+);
+$session= $api->connect(['api-key' => getenv('AZUREAI_API_KEY')]);
+Console::writeLine($session);
+
+// Send prompt
+$api->transmit([
+  'type' => 'conversation.item.create',
+  'item' => [
+    'type'    => 'message',
+    'role'    => 'user',
+    'content' => $content,
+  ]
+]);
+
+// Receive response(s)
+$api->send(['type' => 'response.create', 'response' => ['modalities' => ['text']]]);
+do {
+  $event= $api->receive();
+  Console::writeLine($event);
+} while ('response.done' !== $event['type'] && 'error' !== $event['type']);
+
+$api->close();
+```
 
 See also
 --------
