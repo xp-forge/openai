@@ -3,6 +3,8 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Made it possible to supply organization and project in OpenAI API URI
+  (@thekid)
 * Added `RealtimeApi::socket()` to access the underlying network socket
   (@thekid)
 * Merged PR #17: Move the `Tools` class to the com.openai.tools package

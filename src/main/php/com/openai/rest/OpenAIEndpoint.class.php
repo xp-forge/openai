@@ -1,5 +1,6 @@
 <?php namespace com\openai\rest;
 
+use util\URI;
 use webservices\rest\Endpoint;
 
 /**
@@ -18,7 +19,14 @@ class OpenAIEndpoint extends RestEndpoint {
    * @param  ?string $project
    */
   public function __construct($arg, $organization= null, $project= null) {
-    parent::__construct($arg instanceof Endpoint ? $arg : new Endpoint($arg));
+    if ($arg instanceof Endpoint) {
+      parent::__construct($arg);
+    } else {
+      $uri= $arg instanceof URI ? $arg : new URI($arg);
+      $organization??= $uri->param('organization');
+      $project??= $uri->param('project');
+      parent::__construct(new Endpoint($uri));
+    }
 
     // Pass optional organization and project IDs
     $headers= [];
@@ -33,5 +41,12 @@ class OpenAIEndpoint extends RestEndpoint {
   }
 
   /** @return string */
-  public function toString() { return nameof($this).'(->'.$this->endpoint->base().')'; }
+  public function toString() {
+    $headers= $this->endpoint->headers();
+    $query= '';
+    if ($value= $headers['OpenAI-Organization'] ?? null) $query.= '&organization='.$value;
+    if ($value= $headers['OpenAI-Project'] ?? null) $query.= '&project='.$value;
+
+    return nameof($this).'(->'.$this->endpoint->base().($query ? '?'.substr($query, 1) : '').')';
+  }
 }
