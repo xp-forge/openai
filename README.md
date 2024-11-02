@@ -341,4 +341,5 @@ See also
 --------
 * https://github.com/openai/tiktoken/
 * https://github.com/openai/openai-python
+* https://github.com/openai/openai-node
 * https://github.com/Azure-Samples/azure-openai-reverse-proxy
