@@ -43,6 +43,9 @@ class RealtimeApi implements Traceable, Value {
     });
   }
 
+  /** @return peer.Socket */
+  public function socket() { return $this->ws->socket(); }
+
   /** @param ?util.log.LogCategory $cat */
   public function setTrace($cat) {
     $this->cat= $cat;

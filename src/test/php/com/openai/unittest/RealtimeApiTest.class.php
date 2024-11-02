@@ -2,6 +2,7 @@
 
 use com\openai\realtime\RealtimeApi;
 use lang\IllegalStateException;
+use peer\Socket;
 use test\{Assert, Expect, Test, Values};
 
 class RealtimeApiTest {
@@ -24,6 +25,11 @@ class RealtimeApiTest {
     $c= new RealtimeApi(new TestingSocket());
 
     Assert::false($c->connected());
+  }
+
+  #[Test]
+  public function socket_accessor() {
+    Assert::instance(Socket::class, (new RealtimeApi(self::URI))->socket());
   }
 
   #[Test]

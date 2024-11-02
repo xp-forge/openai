@@ -3,6 +3,8 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Added `RealtimeApi::socket()` to access the underlying network socket
+  (@thekid)
 * Merged PR #17: Move the `Tools` class to the com.openai.tools package
   (@thekid)
 
