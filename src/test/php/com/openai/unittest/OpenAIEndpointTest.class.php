@@ -37,4 +37,12 @@ class OpenAIEndpointTest extends ApiEndpointTest {
       $this->fixture(self::URI, 'org-test', 'prj-test')->headers()['OpenAI-Project']
     );
   }
+
+  #[Test]
+  public function string_representation() {
+    Assert::equals(
+      'com.openai.rest.OpenAIEndpoint(->https://api.openai.example.com/v1/)',
+      $this->fixture(self::URI)->toString()
+    );
+  }
 }

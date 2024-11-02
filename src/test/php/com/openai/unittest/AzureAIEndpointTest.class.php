@@ -28,4 +28,12 @@ class AzureAIEndpointTest extends ApiEndpointTest {
   public function api_key_header_set() {
     Assert::equals('1e51...', $this->fixture(self::URI)->headers()['API-Key']);
   }
+
+  #[Test]
+  public function string_representation() {
+    Assert::equals(
+      'com.openai.rest.AzureAIEndpoint(->https://test.openai.azure.com/openai/deployments/omni/?api-version=2024-02-01)',
+      $this->fixture(self::URI, '2024-02-01')->toString()
+    );
+  }
 }

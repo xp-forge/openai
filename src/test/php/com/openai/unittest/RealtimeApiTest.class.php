@@ -5,6 +5,7 @@ use lang\IllegalStateException;
 use test\{Assert, Expect, Test, Values};
 
 class RealtimeApiTest {
+  const URI= 'wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01';
   const SESSION_CREATED= '{"type": "session.created"}';
 
   /** Returns authentications */
@@ -15,7 +16,7 @@ class RealtimeApiTest {
 
   #[Test]
   public function can_create() {
-    new RealtimeApi('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01');
+    new RealtimeApi(self::URI);
   }
 
   #[Test]
@@ -90,5 +91,13 @@ class RealtimeApiTest {
     $response= $c->transmit(['type' => 'conversation.item.create', 'item' => ['type' => 'message']]);
 
     Assert::equals(['type' => 'conversation.item.created'], $response);
+  }
+
+  #[Test]
+  public function string_representation() {
+    Assert::equals(
+      'com.openai.realtime.RealtimeApi(->wss://api.openai.com:443/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01)',
+      (new RealtimeApi(self::URI))->toString()
+    );
   }
 }

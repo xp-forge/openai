@@ -2,11 +2,11 @@
 
 use com\openai\Tools;
 use com\openai\tools\Functions;
-use lang\IllegalStateException;
+use lang\{IllegalStateException, Value};
 use text\json\Json;
-use util\URI;
 use util\data\Marshalling;
 use util\log\Traceable;
+use util\{Comparison, URI};
 use websocket\WebSocket;
 
 /**
@@ -17,7 +17,9 @@ use websocket\WebSocket;
  * @test  com.openai.unittest.RealtimeApiTest
  * @see   https://platform.openai.com/docs/guides/realtime
  */
-class RealtimeApi implements Traceable {
+class RealtimeApi implements Traceable, Value {
+  use Comparison;
+
   private $ws, $marshalling;
   private $cat= null;
 
@@ -116,5 +118,17 @@ class RealtimeApi implements Traceable {
   /** Ensures socket is closed */
   public function __destruct() {
     $this->ws && $this->ws->close();
+  }
+
+  /** @return string */
+  public function toString() {
+    $socket= $this->ws->socket();
+    return sprintf(
+      '%s(->wss://%s:%d%s)',
+      nameof($this),
+      $socket->host,
+      $socket->port,
+      $this->ws->path()
+    );
   }
 }
