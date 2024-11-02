@@ -8,7 +8,7 @@ OpenAI APIs for XP
 [![Supports PHP 8.0+](https://raw.githubusercontent.com/xp-framework/web/master/static/php-8_0plus.svg)](http://php.net/)
 [![Latest Stable Version](https://poser.pugx.org/xp-forge/openai/version.svg)](https://packagist.org/packages/xp-forge/openai)
 
-This library implements OpenAI APIs with a low-level abstraction approach.
+This library implements OpenAI APIs with a low-level abstraction approach, supporting their REST and realtime APIs, request and response streaming, function calling and TikToken encoding.
 
 Completions
 -----------
@@ -345,3 +345,4 @@ See also
 * https://github.com/openai/openai-python
 * https://github.com/openai/openai-node
 * https://github.com/Azure-Samples/azure-openai-reverse-proxy
+* https://www.youtube.com/watch?v=i-oHvHejdsc - GPT Function calling in a nutshell
