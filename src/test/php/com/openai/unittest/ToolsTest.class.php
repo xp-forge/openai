@@ -1,9 +1,8 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\Tools;
 use com\openai\realtime\RealtimeApi;
 use com\openai\rest\OpenAIEndpoint;
-use com\openai\tools\Functions;
+use com\openai\tools\{Tools, Functions};
 use test\{Assert, Test, Values};
 use webservices\rest\TestEndpoint;
 

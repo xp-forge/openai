@@ -1,7 +1,6 @@
 <?php namespace com\openai\rest;
 
-use com\openai\Tools;
-use com\openai\tools\Functions;
+use com\openai\tools\{Tools, Functions};
 
 /** Base class for OpenAI and AzureAI implementations */
 abstract class RestEndpoint extends ApiEndpoint {
