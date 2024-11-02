@@ -10,22 +10,6 @@ OpenAI APIs for XP
 
 This library implements OpenAI APIs with a low-level abstraction approach.
 
-TikToken
---------
-Encodes text to tokens. Download the vocabularies [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) (used for GPT-3.5 and GPT-4.0) and [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) (used for Omni and O1) first!
-
-```php
-use com\openai\{Encoding, TikTokenFilesIn};
-
-$source= new TikTokenFilesIn('.');
-
-// By name => [9906, 4435, 0]
-$tokens= Encoding::named('cl100k_base')->load($source)->encode('Hello World!');
-
-// By model => [13225, 5922, 0]
-$tokens= Encoding::for('omni')->load($source)->encode('Hello World!');
-```
-
 Completions
 -----------
 Using the REST API, see https://platform.openai.com/docs/api-reference/making-requests
@@ -62,6 +46,22 @@ foreach ($stream->deltas('content') as $delta) {
   Console::write($delta);
 }
 Console::writeLine();
+```
+
+TikToken
+--------
+Encodes text to tokens. Download the vocabularies [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) (used for GPT-3.5 and GPT-4.0) and [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) (used for Omni and O1) first!
+
+```php
+use com\openai\{Encoding, TikTokenFilesIn};
+
+$source= new TikTokenFilesIn('.');
+
+// By name => [9906, 4435, 0]
+$tokens= Encoding::named('cl100k_base')->load($source)->encode('Hello World!');
+
+// By model => [13225, 5922, 0]
+$tokens= Encoding::for('omni')->load($source)->encode('Hello World!');
 ```
 
 Embeddings
