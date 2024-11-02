@@ -3,6 +3,9 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Merged PR #17: Move the `Tools` class to the com.openai.tools package
+  (@thekid)
+
 ## 0.7.0 / 2024-11-01
 
 * Merged PR #16: Refactor implementation to unify tools usage for REST
