@@ -3,6 +3,8 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.8.0 / 2024-11-02
+
 * Made it possible to supply organization and project in OpenAI API URI
   (@thekid)
 * Added `RealtimeApi::socket()` to access the underlying network socket
