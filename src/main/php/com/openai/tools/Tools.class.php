@@ -1,9 +1,8 @@
-<?php namespace com\openai;
-
-use com\openai\tools\Functions;
+<?php namespace com\openai\tools;
 
 /**
- * Tools
+ * Tools incorporate the builtins like `code_interpreter` but also custom
+ * functions declared via `Functions` registry.
  *
  * @test  com.openai.unittest.ToolsTest
  * @see   https://platform.openai.com/docs/assistants/tools

@@ -1,7 +1,6 @@
 <?php namespace com\openai\realtime;
 
-use com\openai\Tools;
-use com\openai\tools\Functions;
+use com\openai\tools\{Tools, Functions};
 use lang\{IllegalStateException, Value};
 use text\json\Json;
 use util\data\Marshalling;

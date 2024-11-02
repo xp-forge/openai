@@ -187,8 +187,7 @@ Custom functions are registered in a `Functions` instance and passed via *tools*
 
 ```php
 use com\openai\rest\OpenAIEndpoint;
-use com\openai\Tools;
-use com\openai\tools\Functions;
+use com\openai\tools\{Tools, Functions};
 
 $functions= (new Functions())->register('weather', new Weather());
 
