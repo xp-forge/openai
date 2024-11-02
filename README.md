@@ -64,6 +64,8 @@ $tokens= Encoding::named('cl100k_base')->load($source)->encode('Hello World!');
 $tokens= Encoding::for('omni')->load($source)->encode('Hello World!');
 ```
 
+Instead of *encode()*, you can use *count()* to count the number of tokens.
+
 Embeddings
 ----------
 To create an embedding for a given text, use https://platform.openai.com/docs/guides/embeddings/what-are-embeddings
