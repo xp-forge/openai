@@ -327,7 +327,7 @@ $api->transmit([
   'item' => [
     'type'    => 'message',
     'role'    => 'user',
-    'content' => $content,
+    'content' => [['type' => 'input_text', 'text' => $message]],
   ]
 ]);
 
