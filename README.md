@@ -48,6 +48,8 @@ foreach ($stream->deltas('content') as $delta) {
 Console::writeLine();
 ```
 
+To access the result object after streaming, use `$stream->result()`. It contains the choices list as well as model, filter results and usage information.
+
 TikToken
 --------
 Encodes text to tokens. Download the vocabularies [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) (used for GPT-3.5 and GPT-4.0) and [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) (used for Omni and O1) first!
