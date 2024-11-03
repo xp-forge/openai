@@ -314,11 +314,11 @@ The realtime API allows streaming audio and/or text to and from language models,
 use com\openai\realtime\RealtimeApi;
 use util\cmd\Console;
 
-$api= new RealtimeApi('wss://example.openai.azure.com/openai/realtime?'.
-  '?api-version=2024-10-01-preview'.
-  '&deployment=gpt-4o-realtime-preview'
-);
-$session= $api->connect(['api-key' => getenv('AZUREAI_API_KEY')]);
+$api= new RealtimeApi('wss://api.openai.com/v1/realtime?model=gpt-4o-realtime-preview');
+$session= $api->connect([
+  'Authorization' => 'Bearer '.getenv('OPENAI_API_KEY'),
+  'OpenAI-Beta'   => 'realtime=v1',
+];
 Console::writeLine($session);
 
 // Send prompt
@@ -339,6 +339,19 @@ do {
 } while ('response.done' !== $event['type'] && 'error' !== $event['type']);
 
 $api->close();
+```
+
+For Azure AI, the setup code is slightly different:
+
+```php
+use com\openai\realtime\RealtimeApi;
+use util\cmd\Console;
+
+$api= new RealtimeApi('wss://example.openai.azure.com/openai/realtime?'.
+  '?api-version=2024-10-01-preview'.
+  '&deployment=gpt-4o-realtime-preview'
+);
+$session= $api->connect(['api-key' => getenv('AZUREAI_API_KEY')]);
 ```
 
 See also
