@@ -3,6 +3,9 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Added optional parameter *timeout* to receive() and transmit() methods
+  (@thekid)
+
 ## 0.8.0 / 2024-11-02
 
 * Made it possible to supply organization and project in OpenAI API URI

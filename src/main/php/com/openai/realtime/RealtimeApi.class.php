@@ -98,10 +98,11 @@ class RealtimeApi implements Traceable, Value {
   /**
    * Receives an answer. Returns NULL if EOF is reached.
    *
+   * @param  ?int|float $timeout
    * @return var
    */
-  public function receive() {
-    $json= $this->ws->receive();
+  public function receive($timeout= null) {
+    $json= $this->ws->receive($timeout);
     $this->cat && $this->cat->debug('<<<', $json);
     return null === $json ? null : $this->marshalling->unmarshal(Json::read($json));
   }
@@ -110,11 +111,12 @@ class RealtimeApi implements Traceable, Value {
    * Sends a given payload and returns the response to it.
    *
    * @param  var $payload
+   * @param  ?int|float $timeout
    * @return var
    */
-  public function transmit($payload) {
+  public function transmit($payload, $timeout= null) {
     $this->send($payload);
-    return $this->receive();
+    return $this->receive($timeout);
   }
 
   /** Ensures socket is closed */
