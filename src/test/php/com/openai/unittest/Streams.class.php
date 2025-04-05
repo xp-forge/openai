@@ -51,11 +51,11 @@ trait Streams {
     return new MemoryInputStream(implode("\n\n", $lines));
   }
 
-  /** Maps deltas to a list of pairs */
-  private function pairsOf(iterable $deltas): array {
+  /** Maps an iterable to a list of pairs */
+  private function pairsOf(iterable $iterable): array {
     $r= [];
-    foreach ($deltas as $field => $delta) {
-      $r[]= [$field => $delta];
+    foreach ($iterable as $key => $value) {
+      $r[]= [$key => $value];
     }
     return $r;
   }
