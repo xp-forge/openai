@@ -13,6 +13,7 @@ use util\Objects;
  * @test  com.openai.unittest.EventsTest
  */
 class Events implements IteratorAggregate {
+  const DONE= '[DONE]';
   private $stream;
 
   /** Creates a new event stream */
@@ -30,7 +31,8 @@ class Events implements IteratorAggregate {
       if (0 === strncmp($line, 'event: ', 6)) {
         $event= substr($line, 7);
       } else if (0 === strncmp($line, 'data: ', 5)) {
-        yield $event => json_decode(substr($line, 6), true);
+        $data= substr($line, 6);
+        if (self::DONE !== $data) yield $event => json_decode($data, true);
         $event= null;
       }
     }

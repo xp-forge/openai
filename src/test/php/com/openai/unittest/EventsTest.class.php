@@ -6,20 +6,7 @@ use lang\IllegalStateException;
 use test\{Assert, Test, Values};
 
 class EventsTest {
-
-  /** Returns input */
-  private function input(array $lines): InputStream {
-    return new MemoryInputStream(implode("\n", $lines));
-  }
-
-  /** Maps events to a list of pairs */
-  private function pairsOf(iterable $events): array {
-    $r= [];
-    foreach ($events as $event => $value) {
-      $r[]= [$event => $value];
-    }
-    return $r;
-  }
+  use Streams;
 
   #[Test]
   public function can_create() {
@@ -61,22 +48,19 @@ class EventsTest {
           'response'      => ['id' => 'test'],
         ]],
       ],
-      $this->pairsOf(new Events($this->input([
-        'event: response.created',
-        'data: {"type":"response.created","response":{"id":"test"}}',
-        '',
-        'event: response.output_item.added',
-        'data: {"type":"response.output_item.added","output_index":0,"item":{"type":"message"}}',
-        '',
-        'event: response.output_text.delta',
-        'data: {"type":"response.output_text.delta","output_index":0,"content_index":0,"delta":"Test"}',
-        '',
-        'event: response.output_text.delta',
-        'data: {"type":"response.output_text.delta","output_index":0,"content_index":0,"delta":"ed"}',
-        '',
-        'event: response.completed',
-        'data: {"type":"response.completed","response":{"id":"test"}}'
-      ])))
+      $this->pairsOf(new Events($this->input($this->contentResponse())))
+    );
+  }
+
+  #[Test]
+  public function can_be_used_for_completions() {
+    Assert::equals(
+      [
+        [null => ['choices' => [['delta' => ['role' => 'assistant']]]]],
+        [null => ['choices' => [['delta' => ['content' => 'Test']]]]],
+        [null => ['choices' => [['delta' => ['content' => 'ed']]]]],
+      ],
+      $this->pairsOf(new Events($this->input($this->contentCompletions())))
     );
   }
 }
