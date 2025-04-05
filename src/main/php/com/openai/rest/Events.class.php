@@ -28,6 +28,7 @@ class Events implements IteratorAggregate {
 
     // Read all lines starting with `event` or `data`, ignore others
     while (null !== ($line= $r->readLine())) {
+      // echo "\n<<< $line\n";
       if (0 === strncmp($line, 'event: ', 6)) {
         $event= substr($line, 7);
       } else if (0 === strncmp($line, 'data: ', 5)) {
