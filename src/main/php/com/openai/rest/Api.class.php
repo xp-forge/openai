@@ -4,7 +4,7 @@ use webservices\rest\{RestResource, RestResponse, RestUpload, UnexpectedStatus};
 
 class Api {
   const JSON= 'application/json';
-  const STREAMING= ['stream' => true, 'stream_options' => ['include_usage' => true]];
+  const EVENTS= 'text/event-stream';
 
   private $resource, $rateLimit;
 
@@ -52,7 +52,17 @@ class Api {
 
   /** Streams API response */
   public function stream(array $payload): EventStream {
-    $this->resource->accepting('text/event-stream');
-    return new EventStream($this->transmit(self::STREAMING + $payload)->stream());
+    static $stream= ['stream' => true, 'stream_options' => ['include_usage' => true]];
+
+    $this->resource->accepting(self::EVENTS);
+    return new EventStream($this->transmit($stream + $payload)->stream());
+  }
+
+  /** Yields events from a streamed response */
+  public function events(array $payload): Events {
+    static $stream= ['stream' => true];
+
+    $this->resource->accepting(self::EVENTS);
+    return new Events($this->transmit($stream + $payload)->stream());
   }
 }
