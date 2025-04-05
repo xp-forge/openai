@@ -2,8 +2,8 @@
 
 use com\openai\rest\EventStream;
 use io\streams\{InputStream, MemoryInputStream};
-use test\{Assert, Test, Values};
 use lang\IllegalStateException;
+use test\{Assert, Test, Values};
 
 class EventStreamTest {
 
