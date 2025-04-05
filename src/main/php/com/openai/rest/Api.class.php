@@ -3,6 +3,7 @@
 use com\openai\tools\Functions;
 use webservices\rest\{RestResource, RestResponse, RestUpload, UnexpectedStatus};
 
+/** @see https://platform.openai.com/docs/guides/responses-vs-chat-completions */
 class Api {
   const JSON= 'application/json';
   const EVENTS= 'text/event-stream';
