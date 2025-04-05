@@ -13,11 +13,12 @@ abstract class RestEndpoint extends ApiEndpoint {
       foreach ($tools->selection as $select) {
         if ($select instanceof Functions) {
           foreach ($select->schema() as $name => $function) {
-            yield ['type' => 'function', 'function' => [
+            yield [
+              'type'        => 'function',
               'name'        => $name,
               'description' => $function['description'],
               'parameters'  => $function['input'],
-            ]];
+            ];
           }
         } else {
           yield $select;

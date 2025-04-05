@@ -11,9 +11,12 @@ class ToolsTest {
   /** Returns a testing API endpoint */
   private function testingEndpoint(): TestEndpoint {
     return new TestEndpoint([
-      'POST /echo' => function($call) {
+      'POST /completions' => function($call) {
         return $call->respond(200, 'OK', ['Content-Type' => 'application/json'], $call->content());
-      }
+      },
+      'POST /responses' => function($call) {
+        return $call->respond(200, 'OK', ['Content-Type' => 'application/json'], $call->content());
+      },
     ]);
   }
 
@@ -41,19 +44,36 @@ class ToolsTest {
   }
 
   #[Test]
-  public function serialized_for_rest_api() {
+  public function serialized_for_completions_api() {
     $functions= $this->functions();
     $endpoint= new OpenAIEndpoint($this->testingEndpoint());
-    $result= $endpoint->api('/echo')->invoke(['tools' => new Tools($functions)]);
+    $result= $endpoint->api('/completions')->invoke(['tools' => new Tools($functions)]);
 
     Assert::equals(
       ['tools' => [[
-        'type' => 'function',
+        'type'     => 'function',
         'function' => [
           'name'        => 'greet_world',
           'description' => 'World',
           'parameters'  => $functions->schema()->current()['input'],
         ],
+      ]]],
+      $result
+    );
+  }
+
+  #[Test]
+  public function serialized_for_responses_api() {
+    $functions= $this->functions();
+    $endpoint= new OpenAIEndpoint($this->testingEndpoint());
+    $result= $endpoint->api('/responses')->invoke(['tools' => new Tools($functions)]);
+
+    Assert::equals(
+      ['tools' => [[
+        'type'        => 'function',
+        'name'        => 'greet_world',
+        'description' => 'World',
+        'parameters'  => $functions->schema()->current()['input'],
       ]]],
       $result
     );
