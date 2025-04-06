@@ -36,7 +36,7 @@ use util\cmd\Console;
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 
-$events= $ai->api('/responses')->events([
+$events= $ai->api('/responses')->stream([
   'model' => 'gpt-4o-mini',
   'input' => $prompt,
 ]);
