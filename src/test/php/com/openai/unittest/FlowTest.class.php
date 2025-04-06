@@ -1,10 +1,10 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\rest\EventStream;
+use com\openai\rest\Flow;
 use lang\IllegalStateException;
 use test\{Assert, Test, Values};
 
-class EventStreamTest {
+class FlowTest {
   use Streams;
 
   /** Filtered deltas */
@@ -16,32 +16,32 @@ class EventStreamTest {
 
   #[Test]
   public function can_create() {
-    new EventStream($this->input([]));
+    new Flow($this->input([]));
   }
 
   #[Test]
   public function receive_done_as_first_token() {
     $events= ['data: [DONE]'];
-    Assert::equals([], $this->pairsOf((new EventStream($this->input($events)))->deltas()));
+    Assert::equals([], $this->pairsOf((new Flow($this->input($events)))->deltas()));
   }
 
   #[Test]
   public function does_not_continue_reading_after_done() {
     $events= ['data: [DONE]', '', 'data: "Test"'];
-    Assert::equals([], $this->pairsOf((new EventStream($this->input($events)))->deltas()));
+    Assert::equals([], $this->pairsOf((new Flow($this->input($events)))->deltas()));
   }
 
   #[Test]
   public function deltas() {
     Assert::equals(
       [['role' => 'assistant'], ['content' => 'Test'], ['content' => 'ed']],
-      $this->pairsOf((new EventStream($this->input($this->contentCompletions())))->deltas())
+      $this->pairsOf((new Flow($this->input($this->contentCompletions())))->deltas())
     );
   }
 
   #[Test]
   public function deltas_throws_if_already_consumed() {
-    $events= new EventStream($this->input($this->contentCompletions()));
+    $events= new Flow($this->input($this->contentCompletions()));
     iterator_count($events->deltas());
 
     Assert::throws(IllegalStateException::class, fn() => iterator_count($events->deltas()));
@@ -51,7 +51,7 @@ class EventStreamTest {
   public function ignores_newlines() {
     Assert::equals(
       [['role' => 'assistant'], ['content' => 'Test'], ['content' => 'ed']],
-      $this->pairsOf((new EventStream($this->input(['', ...$this->contentCompletions()])))->deltas())
+      $this->pairsOf((new Flow($this->input(['', ...$this->contentCompletions()])))->deltas())
     );
   }
 
@@ -59,7 +59,7 @@ class EventStreamTest {
   public function filtered_deltas($filter, $expected) {
     Assert::equals(
       $expected,
-      $this->pairsOf((new EventStream($this->input($this->contentCompletions())))->deltas($filter))
+      $this->pairsOf((new Flow($this->input($this->contentCompletions())))->deltas($filter))
     );
   }
 
@@ -67,7 +67,7 @@ class EventStreamTest {
   public function result() {
     Assert::equals(
       ['choices' => [['message' => ['role' => 'assistant', 'content' => 'Tested']]]],
-      (new EventStream($this->input($this->contentCompletions())))->result()
+      (new Flow($this->input($this->contentCompletions())))->result()
     );
   }
 
@@ -80,7 +80,7 @@ class EventStreamTest {
         ['tool_calls' => [['function' => ['arguments' => '{']]]],
         ['tool_calls' => [['function' => ['arguments' => '}']]]],
       ],
-      $this->pairsOf((new EventStream($this->input($this->toolCallCompletions())))->deltas())
+      $this->pairsOf((new Flow($this->input($this->toolCallCompletions())))->deltas())
     );
   }
 
@@ -92,7 +92,7 @@ class EventStreamTest {
         'message'       => ['role' => 'assistant', 'tool_calls' => $calls],
         'finish_reason' => 'function_call',
       ]]],
-      (new EventStream($this->input($this->toolCallCompletions())))->result()
+      (new Flow($this->input($this->toolCallCompletions())))->result()
     );
   }
 }

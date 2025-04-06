@@ -78,15 +78,15 @@ class Api {
     return $this->transmit($payload)->value();
   }
 
-  /** Streams API response */
-  public function stream(array $payload): EventStream {
-    $this->resource->accepting(self::EVENTS);
-    return new EventStream($this->transmit(['stream' => true] + $payload)->stream());
-  }
-
   /** Yields events from a streamed response */
-  public function events(array $payload): Events {
+  public function stream(array $payload): Events {
     $this->resource->accepting(self::EVENTS);
     return new Events($this->transmit(['stream' => true] + $payload)->stream());
+  }
+
+  /** Completions API flow: Yield deltas and compute result */
+  public function flow(array $payload): Flow {
+    $this->resource->accepting(self::EVENTS);
+    return new Flow($this->transmit(['stream' => true] + $payload)->stream());
   }
 }

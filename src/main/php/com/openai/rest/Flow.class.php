@@ -5,7 +5,7 @@ use lang\IllegalStateException;
 use util\Objects;
 
 /**
- * OpenAI API event stream
+ * OpenAI API completion flow
  *
  * Note: While these event streams are based on server-sent events, they do not
  * utilize their full extent - there are no event types, IDs or multiline data.
@@ -13,9 +13,9 @@ use util\Objects;
  *
  * @see   https://platform.openai.com/docs/guides/production-best-practices/streaming
  * @see   https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events
- * @test  com.openai.unittest.EventStreamTest
+ * @test  com.openai.unittest.FlowTest
  */
-class EventStream {
+class Flow {
   private $stream;
   private $result= null;
 

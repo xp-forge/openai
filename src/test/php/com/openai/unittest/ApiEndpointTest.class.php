@@ -15,6 +15,29 @@ abstract class ApiEndpointTest {
       'POST /audio/transcriptions' => function($call) {
         return $call->respond(200, 'OK', ['Content-Type' => 'application/json'], '"Test"');
       },
+      'POST /responses' => function($call) {
+        if ($call->request()->payload()->value()['stream'] ?? false) {
+          $headers= ['Content-Type' => 'text/event-stream'];
+          $payload= implode("\n", [
+            'event: response.created',
+            'data: {"response":{"id":"test"}}',
+            '',
+            'event: response.output_item.added',
+            'data: {"type":"message"}',
+            '',
+            'event: response.output_text.delta',
+            'data: {"delta":"Test"}',
+            '',
+            'event: response.completed',
+            'data: {"response":{"id":"test"}}',
+          ]);
+        } else {
+          $headers= ['Content-Type' => 'application/json'];
+          $payload= '{"output":[{"type":"message","role":"assistant","content":[]}]}';
+        }
+
+        return $call->respond(200, 'OK', $headers, $payload);
+      },
       'POST /chat/completions' => function($call) {
         if ($call->request()->payload()->value()['stream'] ?? false) {
           $headers= ['Content-Type' => 'text/event-stream'];
@@ -29,12 +52,35 @@ abstract class ApiEndpointTest {
         }
 
         return $call->respond(200, 'OK', $headers, $payload);
-      }
+      },
     ]);
   }
 
   #[Test]
   public function invoke() {
+    $endpoint= $this->fixture($this->testingEndpoint());
+    Assert::equals(
+      ['output' => [['type' => 'message', 'role' => 'assistant', 'content' => []]]],
+      $endpoint->api('/responses')->invoke(['stream' => false])
+    );
+  }
+
+  #[Test]
+  public function stream() {
+    $endpoint= $this->fixture($this->testingEndpoint());
+    Assert::equals(
+      [
+        'response.created'           => ['response' => ['id' => 'test']],
+        'response.output_item.added' => ['type' => 'message'],
+        'response.output_text.delta' => ['delta' => 'Test'],
+        'response.completed'         => ['response' => ['id' => 'test']],
+      ],
+      iterator_to_array($endpoint->api('/responses')->stream(['stream' => true]))
+    );
+  }
+
+  #[Test]
+  public function invoke_completions() {
     $endpoint= $this->fixture($this->testingEndpoint());
     Assert::equals(
       ['choices' => [['message' => ['role' => 'assistant', 'content' => 'Test']]]],
@@ -43,11 +89,11 @@ abstract class ApiEndpointTest {
   }
 
   #[Test]
-  public function stream() {
+  public function flow_completions() {
     $endpoint= $this->fixture($this->testingEndpoint());
     Assert::equals(
       ['choices' => [['message' => ['role' => 'assistant', 'content' => 'Test']]]],
-      $endpoint->api('/chat/completions')->stream(['stream' => true])->result()
+      $endpoint->api('/chat/completions')->flow(['stream' => true])->result()
     );
   }
 
