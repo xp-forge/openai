@@ -46,7 +46,7 @@ foreach ($events as $type => $value) {
 Console::writeLine();
 ```
 
-To access the result object after streaming, check for the *response.completed* event type and use its value. It contains the outuputs as well as model, filter results and usage information.
+To access the result object, check for the *response.completed* event type and use its value. It contains the outuputs as well as model, filter results and usage information.
 
 TikToken
 --------
@@ -255,7 +255,7 @@ class Memory {
 // ...shortened for brevity...
 
 $context= ['user' => $user];
-$return= $calls->call($call['function']['name'], $call['function']['arguments'], $context);
+$return= $calls->call($call['name'], $call['arguments'], $context);
 ```
 
 Azure OpenAI
@@ -350,6 +350,29 @@ $api= new RealtimeApi('wss://example.openai.azure.com/openai/realtime?'.
 );
 $session= $api->connect(['api-key' => getenv('AZUREAI_API_KEY')]);
 ```
+
+Completions API
+---------------
+To use the legacy (but industry standard) chat completions API:
+
+```php
+use com\openai\rest\OpenAIEndpoint;
+use util\cmd\Console;
+
+$ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
+
+$flow= $ai->api('/chat/completions')->flow([
+  'model'    => 'gpt-4o-mini',
+  'messages' => [['role' => 'user', 'content' => $prompt]],
+]);
+$flow= $ai->api('/chat/completions')->flow($payload);
+foreach ($flow->deltas() as $type => $delta) {
+  Console::writeLine('<', $type, '> ', $delta);
+}
+Console::writeLine();
+```
+
+The result object is computed from the streamed deltas and can be retrieved by accessing *$flow->result()*.
 
 See also
 --------
