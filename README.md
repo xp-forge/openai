@@ -116,7 +116,7 @@ $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1'
 $file= new File($argv[1]);
 
 $response= $ai->api('/audio/transcriptions')
-  ->open(['model', 'whisper-1'])
+  ->open(['model' => 'whisper-1'])
   ->transfer('file', $file->in(), $file->filename)
   ->finish()
 ;
@@ -128,7 +128,7 @@ You can also stream uploads from *InputStream*s as follows:
 ```php
 // ...setup code from above...
 
-$upload= $ai->api('/audio/transcriptions')->open(['model', 'whisper-1']);
+$upload= $ai->api('/audio/transcriptions')->open(['model' => 'whisper-1']);
 
 $stream= $upload->stream('file', 'audio.mp3');
 while ($in->available()) {
