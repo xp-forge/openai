@@ -10,7 +10,7 @@ OpenAI APIs for XP
 
 This library implements OpenAI APIs with a low-level abstraction approach, supporting their REST and realtime APIs, request and response streaming, function calling and TikToken encoding.
 
-Completions
+Quick start
 -----------
 Using the REST API, see https://platform.openai.com/docs/api-reference/making-requests
 
@@ -19,12 +19,11 @@ use com\openai\rest\OpenAIEndpoint;
 use util\cmd\Console;
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
-$payload= [
-  'model'    => 'gpt-4o-mini',
-  'messages' => [['role' => 'user', 'content' => $prompt]],
-];
 
-Console::writeLine($ai->api('/chat/completions')->invoke($payload));
+Console::writeLine($ai->api('/responses')->invoke([
+  'model' => 'gpt-4o-mini',
+  'input' => $prompt,
+]));
 ```
 
 Streaming
@@ -36,19 +35,18 @@ use com\openai\rest\OpenAIEndpoint;
 use util\cmd\Console;
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
-$payload= [
-  'model'    => 'gpt-4o-mini',
-  'messages' => [['role' => 'user', 'content' => $prompt]],
-];
 
-$stream= $ai->api('/chat/completions')->stream($payload);
-foreach ($stream->deltas('content') as $delta) {
-  Console::write($delta);
+$events= $ai->api('/responses')->events([
+  'model' => 'gpt-4o-mini',
+  'input' => $prompt,
+]);
+foreach ($events as $type => $value) {
+  Console::write('<', $type, '> ', $value);
 }
 Console::writeLine();
 ```
 
-To access the result object after streaming, use `$stream->result()`. It contains the choices list as well as model, filter results and usage information.
+To access the result object after streaming, check for the *response.completed* event type and use its value. It contains the outuputs as well as model, filter results and usage information.
 
 TikToken
 --------
@@ -197,9 +195,9 @@ $functions= (new Functions())->register('weather', new Weather());
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $payload= [
-  'model'    => 'gpt-4o-mini',
-  'tools'    => new Tools($functions),
-  'messages' => [['role' => 'user', 'content' => $prompt]],
+  'model' => 'gpt-4o-mini',
+  'tools' => new Tools($functions),
+  'input' => [['type' => 'message', 'role' => 'user', 'content' => $content]],
 ];
 ```
 
@@ -213,23 +211,24 @@ use util\cmd\Console;
 // ...setup code from above...
 
 $calls= $functions->calls()->catching(fn($t) => $t->printStackTrace());
-complete: $result= $ai->api('/chat/completions')->invoke($payload));
+next: $result= $ai->api('/responses')->invoke($payload));
 
-// If tool calls are requested, invoke them and return to next completion cycle
-if ('tool_calls' === ($result['choices'][0]['finish_reason'] ?? null)) {
-  $payload['messages'][]= $result['choices'][0]['message'];
-  
-  foreach ($result['choices'][0]['message']['tool_calls'] as $call) {
-    $return= $calls->call($call['function']['name'], $call['function']['arguments']);
-    $payload['messages'][]= [
-      'role'         => 'tool',
-      'tool_call_id' => $call['id'],
-      'content'      => $return,
-    ];
-  }
+// If function calls are requested, invoke them and return to next response cycle
+$invokations= false;
+foreach ($result['output'] as $output) {
+  if ('function_call' !== $output['type']) continue;
 
-  goto complete;
+  $invokations= true;
+  $return= $calls->call($call['name'], $call['arguments']);
+
+  $payload['input'][]= $call;
+  $payload['input'][]= [
+    'type'    => 'function_call_output',
+    'call_id' => $call['call_id'],
+    'output'  => $return,
+  ];
 }
+if ($invokations) goto next;
 
 // Print out final result
 Console::writeLine($result);
@@ -271,12 +270,11 @@ $ai= new AzureAIEndpoint(
   'https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/deployments/mini',
   '2024-02-01'
 );
-$payload= [
-  'model'    => 'gpt-4o-mini',
-  'messages' => [['role' => 'user', 'content' => $prompt]],
-];
 
-Console::writeLine($ai->api('/chat/completions')->invoke($payload));
+Console::writeLine($ai->api('/responses')->invoke([
+  'model' => 'gpt-4o-mini',
+  'input' => $prompt,
+]));
 ```
 
 Distributing requests
@@ -293,12 +291,11 @@ $endpoints= [
 ];
 
 $ai= new Distributed($endpoints, new ByRemainingRequests());
-$payload= [
-  'model'    => 'gpt-4o-mini',
-  'messages' => [['role' => 'user', 'content' => $prompt]],
-];
 
-Console::writeLine($ai->api('/chat/completions')->invoke($payload));
+Console::writeLine($ai->api('/responses')->invoke([
+  'model' => 'gpt-4o-mini',
+  'input' => $prompt,
+]));
 foreach ($endpoints as $i => $endpoint) {
   Console::writeLine('Endpoint #', $i, ': ', $endpoint->rateLimit());
 }
