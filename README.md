@@ -268,7 +268,7 @@ use util\cmd\Console;
 
 $ai= new AzureAIEndpoint(
   'https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/deployments/mini',
-  '2024-02-01'
+  '2025-03-01-preview'
 );
 
 Console::writeLine($ai->api('/responses')->invoke([
