@@ -353,7 +353,7 @@ $session= $api->connect(['api-key' => getenv('AZUREAI_API_KEY')]);
 
 Completions API
 ---------------
-To use the legacy (but industry standard) chat completions API:
+To use the legacy (but industry standard) chat completions API, see https://platform.openai.com/docs/quickstart?api-mode=chat:
 
 ```php
 use com\openai\rest\OpenAIEndpoint;
