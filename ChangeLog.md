@@ -3,13 +3,15 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
-## 0.9.0 / ????-??-??
+## 0.9.0 / 2025-04-14
 
 * **Heads up:** To use streaming with the legacy completions API, you
   need to use *flow()* instead of *stream()*!
   (@thekid)
 * Merged PR #21: Implement responses API streaming, see issue #20 and
   https://platform.openai.com/docs/api-reference/responses
+  (@thekid)
+* Added *ping()* method to `com.openai.realtime.RealtimeApi` class.
   (@thekid)
 * Added optional parameter *timeout* to receive() and transmit() methods
   (@thekid)
