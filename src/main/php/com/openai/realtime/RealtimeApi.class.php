@@ -108,6 +108,16 @@ class RealtimeApi implements Traceable, Value {
   }
 
   /**
+   * Sends a ping and returns the response to it
+   *
+   * @param  var $payload
+   * @return var
+   */
+  public function ping($payload= '') {
+    return $this->ws->ping($payload);
+  }
+
+  /**
    * Sends a given payload and returns the response to it.
    *
    * @param  var $payload
