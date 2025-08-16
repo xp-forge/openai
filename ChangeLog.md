@@ -3,6 +3,10 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.10.0 / 2025-08-16
+
+* Made compatible with `xp-forge/rest-client` 6.0+ - @thekid
+
 ## 0.9.0 / 2025-04-14
 
 * **Heads up:** To use streaming with the legacy completions API, you
