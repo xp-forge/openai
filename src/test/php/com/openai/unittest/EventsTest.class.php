@@ -56,9 +56,9 @@ class EventsTest {
   public function can_be_used_for_completions() {
     Assert::equals(
       [
-        [null => ['choices' => [['delta' => ['role' => 'assistant']]]]],
-        [null => ['choices' => [['delta' => ['content' => 'Test']]]]],
-        [null => ['choices' => [['delta' => ['content' => 'ed']]]]],
+        ['' => ['choices' => [['delta' => ['role' => 'assistant']]]]],
+        ['' => ['choices' => [['delta' => ['content' => 'Test']]]]],
+        ['' => ['choices' => [['delta' => ['content' => 'ed']]]]],
       ],
       $this->pairsOf(new Events($this->input($this->contentCompletions())))
     );

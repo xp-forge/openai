@@ -55,7 +55,7 @@ trait Streams {
   private function pairsOf(iterable $iterable): array {
     $r= [];
     foreach ($iterable as $key => $value) {
-      $r[]= [$key => $value];
+      $r[]= [$key ?? '' => $value];
     }
     return $r;
   }
