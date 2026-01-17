@@ -22,9 +22,25 @@ class RealtimeApi implements Traceable, Value {
   private $ws, $marshalling;
   private $cat= null;
 
-  /** @param string|util.URI|websocket.WebSocket $endpoint */
-  public function __construct($endpoint) {
-    $this->ws= $endpoint instanceof WebSocket ? $endpoint : new WebSocket((string)$endpoint);
+  /**
+   * Creates a new realtime API instance
+   *
+   * @param  string|util.URI|websocket.WebSocket $endpoint
+   * @param  [:string] $parameters
+   */
+  public function __construct($endpoint, array $parameters= []) {
+    if ($endpoint instanceof WebSocket) {
+      $this->ws= $endpoint;
+    } else if ($parameters) {
+      $uri= $endpoint instanceof URI ? $endpoint->using() : (new URI($endpoint))->using();
+      foreach ($parameters as $name => $value) {
+        $uri->param($name, $value);
+      }
+      $this->ws= new WebSocket($uri->create());
+    } else {
+      $this->ws= new WebSocket($endpoint);
+    }
+
     $this->marshalling= (new Marshalling())->mapping(Tools::class, function($tools) {
       foreach ($tools->selection as $select) {
         if ($select instanceof Functions) {
@@ -42,6 +58,9 @@ class RealtimeApi implements Traceable, Value {
       }
     });
   }
+
+  /** @return string */
+  public function path() { return $this->ws->path(); }
 
   /** @return peer.Socket */
   public function socket() { return $this->ws->socket(); }

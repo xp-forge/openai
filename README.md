@@ -344,10 +344,10 @@ For Azure AI, the setup code is slightly different:
 use com\openai\realtime\RealtimeApi;
 use util\cmd\Console;
 
-$api= new RealtimeApi('wss://example.openai.azure.com/openai/realtime?'.
-  '?api-version=2024-10-01-preview'.
-  '&deployment=gpt-4o-realtime-preview'
-);
+$api= new RealtimeApi('wss://example.openai.azure.com/openai/realtime', [
+  'api-version' => '2024-10-01-preview',
+  'deployment'  => 'gpt-4o-realtime-preview',
+]);
 $session= $api->connect(['api-key' => getenv('AZUREAI_API_KEY')]);
 ```
 
