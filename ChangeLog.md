@@ -3,6 +3,8 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Added PHP 8.5 and 8.6 to the test matrix - @thekid
+
 ## 0.10.0 / 2025-08-16
 
 * Made compatible with `xp-forge/rest-client` 6.0+ - @thekid
