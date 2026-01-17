@@ -3,6 +3,8 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.10.1 / 2026-01-17
+
 * Fixed "Using null as an array offset is deprecated" warnings - @thekid
 * Added PHP 8.5 and 8.6 to the test matrix - @thekid
 
