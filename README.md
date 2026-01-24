@@ -21,7 +21,7 @@ use util\cmd\Console;
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 
 Console::writeLine($ai->api('/responses')->invoke([
-  'model' => 'gpt-4o-mini',
+  'model' => 'gpt-5.2',
   'input' => $prompt,
 ]));
 ```
@@ -37,7 +37,7 @@ use util\cmd\Console;
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 
 $events= $ai->api('/responses')->stream([
-  'model' => 'gpt-4o-mini',
+  'model' => 'gpt-5.2',
   'input' => $prompt,
 ]);
 foreach ($events as $type => $value) {
@@ -195,7 +195,7 @@ $functions= (new Functions())->register('weather', new Weather());
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $payload= [
-  'model' => 'gpt-4o-mini',
+  'model' => 'gpt-5.2',
   'tools' => new Tools($functions),
   'input' => [['type' => 'message', 'role' => 'user', 'content' => $content]],
 ];
@@ -266,13 +266,17 @@ These endpoints differ slightly in how they are invoked, which is handled by the
 use com\openai\rest\AzureAIEndpoint;
 use util\cmd\Console;
 
+// Using V1 API
+$ai= new AzureAIEndpoint('https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/v1');
+
+// Using API version
 $ai= new AzureAIEndpoint(
   'https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/deployments/mini',
-  '2025-03-01-preview'
+  '2025-04-01-preview'
 );
 
 Console::writeLine($ai->api('/responses')->invoke([
-  'model' => 'gpt-4o-mini',
+  'model' => 'gpt-5.2',
   'input' => $prompt,
 ]));
 ```
@@ -286,14 +290,14 @@ use com\openai\rest\{AzureAIEndpoint, Distributed, ByRemainingRequests};
 use util\cmd\Console;
 
 $endpoints= [
-  new AzureAIEndpoint('https://...@r1.openai.azure.com/openai/deployments/mini', '2024-02-01'),
-  new AzureAIEndpoint('https://...@r2.openai.azure.com/openai/deployments/mini', '2024-02-01'),
+  new AzureAIEndpoint('https://...@r1.openai.azure.com/openai/v1'),
+  new AzureAIEndpoint('https://...@r2.openai.azure.com/openai/v1'),
 ];
 
 $ai= new Distributed($endpoints, new ByRemainingRequests());
 
 Console::writeLine($ai->api('/responses')->invoke([
-  'model' => 'gpt-4o-mini',
+  'model' => 'gpt-5.2',
   'input' => $prompt,
 ]));
 foreach ($endpoints as $i => $endpoint) {
@@ -362,7 +366,7 @@ use util\cmd\Console;
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 
 $flow= $ai->api('/chat/completions')->flow([
-  'model'    => 'gpt-4o-mini',
+  'model'    => 'gpt-5.2',
   'messages' => [['role' => 'user', 'content' => $prompt]],
 ]);
 foreach ($flow->deltas() as $type => $delta) {

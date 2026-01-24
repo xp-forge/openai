@@ -15,13 +15,18 @@ class AzureAIEndpointTest extends ApiEndpointTest {
   }
 
   #[Test]
+  public function no_version_by_default() {
+    Assert::null($this->fixture(self::URI)->version);
+  }
+
+  #[Test]
   public function version() {
-    Assert::equals('2024-02-01', $this->fixture(self::URI, '2024-02-01')->version);
+    Assert::equals('2025-04-01-preview', $this->fixture(self::URI, '2025-04-01-preview')->version);
   }
 
   #[Test]
   public function version_extracted_from_uri() {
-    Assert::equals('2024-02-01', $this->fixture(self::URI.'?api-version=2024-02-01')->version);
+    Assert::equals('2025-04-01-preview', $this->fixture(self::URI.'?api-version=2025-04-01-preview')->version);
   }
 
   #[Test]
@@ -31,6 +36,14 @@ class AzureAIEndpointTest extends ApiEndpointTest {
 
   #[Test]
   public function string_representation() {
+    Assert::equals(
+      'com.openai.rest.AzureAIEndpoint(->https://test.openai.azure.com/openai/deployments/omni/)',
+      $this->fixture(self::URI)->toString()
+    );
+  }
+
+  #[Test]
+  public function string_representation_with_version() {
     Assert::equals(
       'com.openai.rest.AzureAIEndpoint(->https://test.openai.azure.com/openai/deployments/omni/?api-version=2024-02-01)',
       $this->fixture(self::URI, '2024-02-01')->toString()
