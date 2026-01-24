@@ -33,6 +33,38 @@ class RealtimeApiTest {
   }
 
   #[Test]
+  public function path_accessor() {
+    Assert::equals(
+      '/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01',
+      (new RealtimeApi(self::URI))->path()
+    );
+  }
+
+  #[Test]
+  public function base_and_parameters() {
+    Assert::equals(
+      '/v1/realtime?model=gpt-realtime-2026',
+      (new RealtimeApi('wss://api.openai.com/v1/realtime', ['model' => 'gpt-realtime-2026']))->path()
+    );
+  }
+
+  #[Test]
+  public function addding_parameters() {
+    Assert::equals(
+      '/v1/realtime?model=gpt-4o-realtime-preview-2024-10-01&api-version=2024-10-01-preview',
+      (new RealtimeApi(self::URI, ['api-version' => '2024-10-01-preview']))->path()
+    );
+  }
+
+  #[Test]
+  public function overwriting_parameters() {
+    Assert::equals(
+      '/v1/realtime?model=gpt-realtime-2026',
+      (new RealtimeApi(self::URI, ['model' => 'gpt-realtime-2026']))->path()
+    );
+  }
+
+  #[Test]
   public function connect() {
     $c= new RealtimeApi(new TestingSocket([self::SESSION_CREATED]));
     $c->connect();
