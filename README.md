@@ -365,7 +365,6 @@ $flow= $ai->api('/chat/completions')->flow([
   'model'    => 'gpt-4o-mini',
   'messages' => [['role' => 'user', 'content' => $prompt]],
 ]);
-$flow= $ai->api('/chat/completions')->flow($payload);
 foreach ($flow->deltas() as $type => $delta) {
   Console::writeLine('<', $type, '> ', $delta);
 }
