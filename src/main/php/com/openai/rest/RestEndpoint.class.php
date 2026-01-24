@@ -31,6 +31,18 @@ abstract class RestEndpoint extends ApiEndpoint {
   /** Returns rate limit */
   public function rateLimit(): RateLimit { return $this->rateLimit; }
 
+  /**
+   * Adds headers to be sent with every request
+   *
+   * @param  string|[:string] $arg
+   * @param  ?string $value
+   * @return self
+   */
+  public function with($arg, $value= null) {
+    $this->endpoint->with($arg, $value);
+    return $this;
+  }
+
   /** @return [:var] */
   public function headers() { return $this->endpoint->headers(); }
 
