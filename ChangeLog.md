@@ -3,6 +3,11 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.11.0 / 2026-01-24
+
+* Merged PR #22: Allow specifying parameters in the RealtimeApi constructor
+  (@thekid)
+
 ## 0.10.1 / 2026-01-17
 
 * Fixed "Using null as an array offset is deprecated" warnings - @thekid
