@@ -271,7 +271,7 @@ $ai= new AzureAIEndpoint('https://'.getenv('AZUREAI_API_KEY').'@example.openai.a
 
 // Using API version
 $ai= new AzureAIEndpoint(
-  'https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/deployments/mini',
+  'https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/deployments/gpt-5.2',
   '2025-04-01-preview'
 );
 
