@@ -35,6 +35,22 @@ class AzureAIEndpointTest extends ApiEndpointTest {
   }
 
   #[Test]
+  public function additional_header() {
+    Assert::equals(
+      'preview',
+      $this->fixture(self::URI)->with('aoai-evals', 'preview')->headers()['aoai-evals']
+    );
+  }
+
+  #[Test]
+  public function additional_headers() {
+    Assert::equals(
+      'preview',
+      $this->fixture(self::URI)->with(['aoai-evals' => 'preview'])->headers()['aoai-evals']
+    );
+  }
+
+  #[Test]
   public function string_representation() {
     Assert::equals(
       'com.openai.rest.AzureAIEndpoint(->https://test.openai.azure.com/openai/deployments/omni/)',
