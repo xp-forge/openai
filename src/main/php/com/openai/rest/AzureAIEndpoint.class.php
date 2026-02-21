@@ -30,14 +30,21 @@ class AzureAIEndpoint extends RestEndpoint {
     }
   }
 
+  /** @return string */
+  private function versioned() {
+    return null === $this->version ? '' : '?api-version='.$this->version;
+  }
+
   /** Returns an API */
   public function api(string $path, array $segments= []): Api {
     return new Api(
-      $this->endpoint->resource(ltrim($path, '/').'?api-version='.$this->version, $segments),
+      $this->endpoint->resource(ltrim($path, '/').$this->versioned(), $segments),
       $this->rateLimit
     );
   }
 
   /** @return string */
-  public function toString() { return nameof($this).'(->'.$this->endpoint->base().'?api-version='.$this->version.')'; }
+  public function toString() {
+    return nameof($this).'(->'.$this->endpoint->base().$this->versioned().')';
+  }
 }
