@@ -3,6 +3,11 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 0.12.0 / 2026-02-21
+
+* Merged PR #23: Support accessing Azure AI V1 API without api-version
+  (@theid)
+
 ## 0.11.0 / 2026-01-24
 
 * Merged PR #22: Allow specifying parameters in the RealtimeApi constructor
