@@ -32,7 +32,7 @@ class TikTokenFilesIn extends Source {
    *
    * @param  string $source
    * @throws lang.IllegalArgumentException
-   * @throws io.IOException
+   * @throws io.OperationFailed
    */
   public function tokens($source): iterable {
     $tried= [];
