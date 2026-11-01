@@ -5,6 +5,8 @@ OpenAI APIs for XP ChangeLog
 
 ## 1.0.0 / 2026-11-01
 
+* **Heads up:** Dropped support for PHP < 7.4, see xp-framework/rfc#343
+  (@thekid)
 * **Heads up**: Removed `com.openai.Encoding::for($model)`, removing a
   maintenance liability - and all newer models use `o200k_base` anyways
   (@thekid)
