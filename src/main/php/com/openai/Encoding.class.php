@@ -10,37 +10,64 @@ use lang\{Enum, IllegalArgumentException};
  * @test  com.openai.unittest.EncodingTest
  */
 class Encoding extends Enum {
-  const ENDOFTEXT  = '<|endoftext|>';
-  const FIM_PREFIX = '<|fim_prefix|>';
-  const FIM_MIDDLE = '<|fim_middle|>';
-  const FIM_SUFFIX = '<|fim_suffix|>';
-  const ENDOFPROMPT= '<|endofprompt|>';
-
-  public static $r50k_base, $p50k_base, $cl100k_base, $o200k_base;
+  public static $r50k_base, $p50k_base, $cl100k_base, $o200k_base, $o200k_harmony;
   private static $definitions= [
     'r50k_base'   => [
+      'file'    => 'r50k_base',
       'pattern' => '/\'(?:[sdmt]|ll|ve|re)| ?\p{L}++| ?\p{N}++| ?[^\s\p{L}\p{N}]++|\s++$|\s+(?!\S)|\s/u',
-      'special' => [self::ENDOFTEXT => 50256],
+      'special' => ['<|endoftext|>' => 50256],
     ],
     'p50k_base'   => [
+      'file'    => 'p50k_base',
       'pattern' => '/\'(?:[sdmt]|ll|ve|re)| ?\p{L}++| ?\p{N}++| ?[^\s\p{L}\p{N}]++|\s++$|\s+(?!\S)|\s/u',
-      'special' => [self::ENDOFTEXT => 50256],
+      'special' => ['<|endoftext|>' => 50256],
     ],
     'cl100k_base' => [
+      'file'    => 'cl100k_base',
       'pattern' => '/\'(?i:[sdmt]|ll|ve|re)|[^\r\n\p{L}\p{N}]?+\p{L}++|\p{N}{1,3}+| ?[^\s\p{L}\p{N}]++[\r\n]*+|\s++$|\s*[\r\n]|\s+(?!\S)|\s/u',
       'special' => [
-        self::ENDOFTEXT   => 100257,
-        self::FIM_PREFIX  => 100258,
-        self::FIM_MIDDLE  => 100259,
-        self::FIM_SUFFIX  => 100260,
-        self::ENDOFPROMPT => 100276,
+        '<|endoftext|>'   => 100257,
+        '<|fim_prefix|>'  => 100258,
+        '<|fim_middle|>'  => 100259,
+        '<|fim_middle|>'  => 100260,
+        '<|endofprompt|>' => 100276,
       ],
     ],
     'o200k_base'  => [
+      'file'    => 'o200k_base',
       'pattern' => '/[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]*[\p{Ll}\p{Lm}\p{Lo}\p{M}]+(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)?|[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]+[\p{Ll}\p{Lm}\p{Lo}\p{M}]*(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)?|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n\/]*|\s*[\r\n]+|\s+(?!\S)|\s+/u',
-      'special' => [self::ENDOFTEXT => 199999, self::ENDOFPROMPT => 200018],
+      'special' => [
+        '<|endoftext|>'   => 199999,
+        '<|endofprompt|>' => 200018,
+      ],
+    ],
+    'o200k_harmony' => [
+      'file'    => 'o200k_base',
+      'pattern' => '/[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]*[\p{Ll}\p{Lm}\p{Lo}\p{M}]+(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)?|[^\r\n\p{L}\p{N}]?[\p{Lu}\p{Lt}\p{Lm}\p{Lo}\p{M}]+[\p{Ll}\p{Lm}\p{Lo}\p{M}]*(?i:\'s|\'t|\'re|\'ve|\'m|\'ll|\'d)?|\p{N}{1,3}| ?[^\s\p{L}\p{N}]+[\r\n\/]*|\s*[\r\n]+|\s+(?!\S)|\s+/u',
+      'special' => [
+        '<|endoftext|>'       => 199999,
+        '<|endofprompt|>'     => 200018,
+        '<|startoftext|>'     => 199998,
+        '<|endoftext|>'       => 199999,
+        '<|reserved_200000|>' => 200000,
+        '<|reserved_200001|>' => 200001,
+        '<|return|>'          => 200002,
+        '<|constrain|>'       => 200003,
+        '<|reserved_200004|>' => 200004,
+        '<|channel|>'         => 200005,
+        '<|start|>'           => 200006,
+        '<|end|>'             => 200007,
+        '<|message|>'         => 200008,
+        '<|reserved_200009|>' => 200009,
+        '<|reserved_200010|>' => 200010,
+        '<|reserved_200011|>' => 200011,
+        '<|call|>'            => 200012,
+      ],
     ],
   ];
+
+  /** Returns the tiktoken file */
+  public function file(): string { return self::$definitions[$this->name]['file']; }
 
   /** Returns the pattern associated with this encoding */
   public function pattern(): string { return self::$definitions[$this->name]['pattern']; }
@@ -50,7 +77,7 @@ class Encoding extends Enum {
 
   /** Loads encoder with vocabulary from a given source */
   public function load(Source $source): Encoder {
-    return new Encoder($source->tokens($this->name), $this);
+    return new Encoder($source->tokens(self::$definitions[$this->name]['file']), $this);
   }
 
   /**
@@ -60,26 +87,5 @@ class Encoding extends Enum {
    */
   public static function named(string $name): self {
     return parent::valueOf(self::class, $name);
-  }
-
-  /**
-   * Returns an encoding for a given model
-   *
-   * @throws  lang.IllegalArgumentException
-   */
-  public static function for(string $model): self {
-    static $models= [
-      '/^o1/'       => 'o200k_base',
-      '/^omni/'     => 'o200k_base',
-      '/^gpt-4o/'   => 'o200k_base',
-      '/^gpt-4/'    => 'cl100k_base',
-      '/^gpt-3.?5/' => 'cl100k_base',
-    ];
-
-    foreach ($models as $pattern => $name) {
-      if (preg_match($pattern, $model)) return self::named($name);
-    }
-
-    throw new IllegalArgumentException('Unknown model "'.$model.'"');
   }
 }
