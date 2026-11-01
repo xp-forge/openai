@@ -19,54 +19,54 @@ class Functions implements Value {
   /**
    * Registers public instance methods for a given implementation
    *
-   * @param  string $namespace
+   * @param  string $group
    * @param  string|object $impl
    * @return self
    */
-  private function methods($namespace, $impl) {
-    $this->methods[$namespace]= [];
+  private function methods($group, $impl) {
+    $this->methods[$group]= [];
     foreach (Reflection::type($impl)->methods() as $name => $method) {
-      $mod= $method->modifiers();
-      if ($mod->isStatic() || !$mod->isPublic()) continue;
+      $m= $method->modifiers();
+      if ($m->isStatic() || !$m->isPublic()) continue;
 
-      $this->methods[$namespace][$name]= $method;
+      $this->methods[$group][$name]= $method;
     }
     return $this;
   }
 
-  /** Registers the given instance using a defined namespace */
-  public function register(string $namespace, object $instance): self {
-    $this->instances[$namespace]= [$instance, null];
-    return $this->methods($namespace, $instance);
+  /** Registers the given instance using a defined group */
+  public function register(string $group, object $instance): self {
+    $this->instances[$group]= [$instance, null];
+    return $this->methods($group, $instance);
   }
 
   /**
-   * Register the given type using a defined namespace
+   * Register the given type using a defined group
    *
-   * @param  string $namespace
+   * @param  string $group
    * @param  string|lang.Type $impl
    * @param  ?function(lang.Type): object $new
    * @return self
    */
-  public function with(string $namespace, $impl, $new= null): self {
+  public function with(string $group, $impl, $new= null): self {
     $t= $impl instanceof Type ? $impl : Type::forName($impl);
-    $this->instances[$namespace]= [null, fn() => $new ? $new($t) : $t->newInstance()];
-    return $this->methods($namespace, $impl);
+    $this->instances[$group]= [null, fn() => $new ? $new($t) : $t->newInstance()];
+    return $this->methods($group, $impl);
   }
 
   /** Selects functions matching the given selectors */
   public function select(array $selectors): self {
     $self= new self();
     foreach ($selectors as $selector) {
-      [$namespace, $name]= explode('_', $selector);
-      if (!isset($this->methods[$namespace])) continue;
+      [$group, $name]= explode('_', $selector);
+      if (!isset($this->methods[$group])) continue;
 
-      $methods= $this->methods[$namespace];
+      $methods= $this->methods[$group];
       if ('*' === $name) {
-        $self->methods[$namespace]= $methods;
+        $self->methods[$group]= $methods;
       } else if ($method= $methods[$name] ?? null) {
-        $self->methods[$namespace]??= [];
-        $self->methods[$namespace][$name]= $method;
+        $self->methods[$group]??= [];
+        $self->methods[$group][$name]= $method;
       }
     }
     return $self;
@@ -74,7 +74,7 @@ class Functions implements Value {
 
   /** Yields descriptions for all methods registered */
   public function schema(): iterable {
-    foreach ($this->methods as $namespace => $methods) {
+    foreach ($this->methods as $group => $methods) {
       foreach ($methods as $name => $method) {
 
         // Use annotated parameters if possible
@@ -91,7 +91,7 @@ class Functions implements Value {
           $reflect->optional() || $required[]= $param;
         }
 
-        yield $namespace.'_'.$name => [
+        yield $group.'_'.$name => [
           'description' => $method->comment() ?? ucfirst($name),
           'input'       => [
             'type'        => 'object',
@@ -114,16 +114,16 @@ class Functions implements Value {
    * @throws lang.IllegalArgumentException if there is no such target registered
    */
   public function target($call) {
-    sscanf($call, "%[^_]_%[^\r]", $namespace, $name);
-    if (null === ($method= $this->methods[$namespace][$name] ?? null)) {
-      throw new IllegalArgumentException(isset($this->methods[$namespace])
-        ? "Unknown function {$name} in {$namespace}"
-        : "Unknown namespace {$namespace}"
+    sscanf($call, "%[^_]_%[^\r]", $group, $name);
+    if (null === ($method= $this->methods[$group][$name] ?? null)) {
+      throw new IllegalArgumentException(isset($this->methods[$group])
+        ? "Unknown function {$name} in {$group}"
+        : "Unknown group {$group}"
       );
     }
 
     // Lazily create instance if not set
-    return [$this->instances[$namespace][0] ?? $this->instances[$namespace][1](), $method];
+    return [$this->instances[$group][0] ?? $this->instances[$group][1](), $method];
   }
 
   /** @return string */
