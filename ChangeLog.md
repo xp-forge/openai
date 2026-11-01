@@ -3,6 +3,17 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 1.0.0 / 2026-11-01
+
+* **Heads up**: Removed `com.openai.Encoding::for($model)`, removing a
+  maintenance liability - and all newer models use `o200k_base` anyways
+  (@thekid)
+* Merged PR #26: Add `o200k_harmony` encoding definition used for GPT-OSS
+  (@thekid)
+* Merged PR #25: Limit merges along vocabulary during TikToken encoding,
+  optimizing performance for repeated characters including whitespace.
+  (@thekid)
+
 ## 0.12.0 / 2026-02-21
 
 * Merged PR #23: Support accessing Azure AI V1 API without api-version
