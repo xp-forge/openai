@@ -21,7 +21,7 @@ use util\cmd\Console;
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 
 Console::writeLine($ai->api('/responses')->invoke([
-  'model' => 'gpt-5.2',
+  'model' => 'gpt-6-terra',
   'input' => $prompt,
 ]));
 ```
@@ -37,7 +37,7 @@ use util\cmd\Console;
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 
 $events= $ai->api('/responses')->stream([
-  'model' => 'gpt-5.2',
+  'model' => 'gpt-6-terra',
   'input' => $prompt,
 ]);
 foreach ($events as $type => $value) {
@@ -50,7 +50,7 @@ To access the result object, check for the *response.completed* event type and u
 
 TikToken
 --------
-Encodes text to tokens. Download the vocabularies [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) (used for GPT-3.5 and GPT-4.0) and [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) (used for Omni and O1) first!
+Encodes text to tokens. Download the vocabularies [cl100k_base](https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken) (used for GPT-3.5 and GPT-4.0), [o200k_base](https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken) (used for all models since) first!
 
 ```php
 use com\openai\{Encoding, TikTokenFilesIn};
@@ -59,9 +59,6 @@ $source= new TikTokenFilesIn('.');
 
 // By name => [9906, 4435, 0]
 $tokens= Encoding::named('cl100k_base')->load($source)->encode('Hello World!');
-
-// By model => [13225, 5922, 0]
-$tokens= Encoding::for('omni')->load($source)->encode('Hello World!');
 ```
 
 Instead of *encode()*, you can use *count()* to count the number of tokens.
@@ -195,7 +192,7 @@ $functions= (new Functions())->register('weather', new Weather());
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $payload= [
-  'model' => 'gpt-5.2',
+  'model' => 'gpt-6-terra',
   'tools' => new Tools($functions),
   'input' => [['type' => 'message', 'role' => 'user', 'content' => $content]],
 ];
@@ -271,12 +268,12 @@ $ai= new AzureAIEndpoint('https://'.getenv('AZUREAI_API_KEY').'@example.openai.a
 
 // Using API version
 $ai= new AzureAIEndpoint(
-  'https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/deployments/gpt-5.2',
+  'https://'.getenv('AZUREAI_API_KEY').'@example.openai.azure.com/openai/deployments/gpt-6-terra',
   '2025-04-01-preview'
 );
 
 Console::writeLine($ai->api('/responses')->invoke([
-  'model' => 'gpt-5.2',
+  'model' => 'gpt-6-terra',
   'input' => $prompt,
 ]));
 ```
@@ -297,7 +294,7 @@ $endpoints= [
 $ai= new Distributed($endpoints, new ByRemainingRequests());
 
 Console::writeLine($ai->api('/responses')->invoke([
-  'model' => 'gpt-5.2',
+  'model' => 'gpt-6-terra',
   'input' => $prompt,
 ]));
 foreach ($endpoints as $i => $endpoint) {
@@ -366,7 +363,7 @@ use util\cmd\Console;
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 
 $flow= $ai->api('/chat/completions')->flow([
-  'model'    => 'gpt-5.2',
+  'model'    => 'gpt-6-terra',
   'messages' => [['role' => 'user', 'content' => $prompt]],
 ]);
 foreach ($flow->deltas() as $type => $delta) {
