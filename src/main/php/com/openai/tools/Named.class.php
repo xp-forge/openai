@@ -2,6 +2,7 @@
 
 use ReflectionObject, ReflectionFunction;
 
+/** @test com.openai.unittest.NamedTest */
 class Named extends Definitions {
   private $functions= [];
   public $description= null;
