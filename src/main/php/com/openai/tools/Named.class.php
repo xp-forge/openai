@@ -43,7 +43,7 @@ class Named extends Definitions {
         if ($param->getAttributes(Context::class)) {
           continue;
         } else if ($attributes= $param->getAttributes(Param::class)) {
-          $properties[$param->name]= new Param(...$attributes[0]->getArguments())->schema();
+          $properties[$param->name]= (new Param(...$attributes[0]->getArguments()))->schema();
         } else {
           $properties[$param->name]= ['type' => 'string', 'description' => ucfirst($param->name)];
         }
