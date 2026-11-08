@@ -1,20 +1,15 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\tools\{Functions, Param, Context};
-use lang\{XPClass, IllegalArgumentException};
-use test\{Assert, Expect, Test, Values};
+use com\openai\tools\{Functions, Param, Context, Definition};
+use lang\XPClass;
+use test\{Assert, Test, Values};
 
 class FunctionsTest {
-  const HELLO_WORLD= [
-    'testing_hello' => [
-      'description' => 'Hello World',
-      'input'       => [
-        'type'       => 'object',
-        'properties' => ['name' => ['type' => 'string', 'description' => 'Name']],
-        'required'   => [],
-      ],
-    ]
-  ];
+  const HELLO_WORLD= ['testing_hello', 'Hello World', [
+    'type'       => 'object',
+    'properties' => ['name' => ['type' => 'string', 'description' => 'Name']],
+    'required'   => [],
+  ]];
 
   /** For select() test */
   private function selections(): iterable {
@@ -34,24 +29,24 @@ class FunctionsTest {
   #[Test]
   public function register() {
     Assert::equals(
-      self::HELLO_WORLD,
-      iterator_to_array((new Functions())->register('testing', new HelloWorld())->schema()),
+      [new Definition(...self::HELLO_WORLD)],
+      [...(new Functions())->register('testing', new HelloWorld())->schema()],
     );
   }
 
   #[Test]
   public function with_classname() {
     Assert::equals(
-      self::HELLO_WORLD,
-      iterator_to_array((new Functions())->with('testing', HelloWorld::class)->schema()),
+      [new Definition(...self::HELLO_WORLD)],
+      [...(new Functions())->with('testing', HelloWorld::class)->schema()],
     );
   }
 
   #[Test]
   public function with_xpclass() {
     Assert::equals(
-      self::HELLO_WORLD,
-      iterator_to_array((new Functions())->with('testing', XPClass::forName('com.openai.unittest.HelloWorld'))->schema()),
+      [new Definition(...self::HELLO_WORLD)],
+      [...(new Functions())->with('testing', XPClass::forName('com.openai.unittest.HelloWorld'))->schema()],
     );
   }
 
@@ -66,16 +61,7 @@ class FunctionsTest {
       }
     });
 
-    Assert::equals(
-      [
-        'type'       => 'object',
-        'properties' => [
-          'name' => ['type' => 'string', 'description' => 'Name']
-        ],
-        'required'   => ['name'],
-      ],
-      $fixture->schema()->current()['input'],
-    );
+    Assert::equals(['name'], $fixture->schema()->current()->input['required']);
   }
 
   #[Test]
@@ -88,16 +74,7 @@ class FunctionsTest {
       }
     });
 
-    Assert::equals(
-      [
-        'type'       => 'object',
-        'properties' => [
-          'name' => ['type' => 'string', 'description' => 'Name']
-        ],
-        'required'   => [],
-      ],
-      $fixture->schema()->current()['input'],
-    );
+    Assert::equals([], $fixture->schema()->current()->input['required']);
   }
 
   #[Test]
@@ -119,7 +96,7 @@ class FunctionsTest {
         'properties' => (object)[],
         'required'   => [],
       ],
-      $fixture->schema()->current()['input'],
+      $fixture->schema()->current()->input,
     );
   }
 
@@ -144,7 +121,7 @@ class FunctionsTest {
         ],
         'required'   => ['name'],
       ],
-      $fixture->schema()->current()['input'],
+      $fixture->schema()->current()->input,
     );
   }
 
@@ -169,7 +146,7 @@ class FunctionsTest {
         ],
         'required'   => ['unit'],
       ],
-      $fixture->schema()->current()['input'],
+      $fixture->schema()->current()->input,
     );
   }
 
@@ -194,7 +171,7 @@ class FunctionsTest {
         ],
         'required'   => [],
       ],
-      $fixture->schema()->current()['input'],
+      $fixture->schema()->current()->input,
     );
   }
 
@@ -211,8 +188,8 @@ class FunctionsTest {
     ;
 
     $result= [];
-    foreach ($fixture->select($namespaces)->schema() as $name => $description) {
-      $result[]= $name;
+    foreach ($fixture->select($namespaces)->schema() as $description) {
+      $result[]= $description->name;
     }
     Assert::equals($expected, $result);
   }
@@ -225,13 +202,13 @@ class FunctionsTest {
     Assert::equals($expected, $result);
   }
 
-  #[Test, Expect(IllegalArgumentException::class)]
+  #[Test]
   public function unknown_namespace() {
-    (new Functions())->with('testing', HelloWorld::class)->target('unknown_hello');
+    Assert::null((new Functions())->with('testing', HelloWorld::class)->invokeable('unknown_hello'));
   }
 
-  #[Test, Expect(IllegalArgumentException::class)]
+  #[Test]
   public function unknown_method() {
-    (new Functions())->with('testing', HelloWorld::class)->target('testing_unknown');
+    Assert::null((new Functions())->with('testing', HelloWorld::class)->invokeable('testing_unknown'));
   }
 }

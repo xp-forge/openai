@@ -1,0 +1,72 @@
+<?php namespace com\openai\tools;
+
+use ReflectionObject, ReflectionFunction;
+
+class Named extends Definitions {
+  private $functions= [];
+  public $description= null;
+
+  /** @param [:callable]|object $arg */
+  public function __construct($arg, ?string $description= null) {
+    if (is_array($arg)) {
+      foreach ($arg as $name => $closure) {
+        $this->functions[$name]= new ReflectionFunction($closure);
+      }
+      $this->description= $description;
+    } else {
+      $reflect= new ReflectionObject($arg);
+
+      // Use API doc comment for description if none is given
+      if (null !== $description) {
+        $this->description= $description;
+      } else if ($comment= $reflect->getDocComment()) {
+        $this->description= preg_replace(
+          ['/^\/\*\* ?/', '/\n\s+\* ?/', '/ ?\*\/$/'], ['', "\n", ''],
+          $comment
+        );
+      }
+
+      // Constructors, destructors, interceptors and other special methods use a `__` prefix
+      foreach ($reflect->getMethods() as $method) {
+        if ($method->isPublic() && !$method->isStatic() && 0 !== strncmp($method->name, '__', 2)) {
+          $this->functions[$method->name]= new ReflectionFunction($method->getClosure($arg));
+        }
+      }
+    }
+  }
+
+  /** Returns schema for these functions */
+  public function schema($prefix= '') {
+    foreach ($this->functions as $name => $reflect) {
+      $properties= $required= [];
+      foreach ($reflect->getParameters() as $param) {
+        if ($param->getAttributes(Context::class)) {
+          continue;
+        } else if ($attributes= $param->getAttributes(Param::class)) {
+          $properties[$param->name]= new Param(...$attributes[0]->getArguments())->schema();
+        } else {
+          $properties[$param->name]= ['type' => 'string', 'description' => ucfirst($param->name)];
+        }
+        $param->isOptional() || $required[]= $param->name;
+      }
+
+      yield new Definition(
+        $prefix.$name,
+        preg_replace(
+          ['/^\/\*\* ?/', '/\n\s+\* ?/', '/ ?\*\/$/'], ['', "\n", ''],
+          $reflect->getDocComment() ?: $name
+        ),
+        [
+          'type'        => 'object',
+          'properties'  => $properties ?: (object)[],
+          'required'    => $required,
+        ],
+      );
+    }
+  }
+
+  /** @return ?ReflectionFunction */
+  public function invokeable(string $name, ?string $namespace= null) {
+    return null === $namespace ? $this->functions[$name] ?? null : null;
+  }
+}

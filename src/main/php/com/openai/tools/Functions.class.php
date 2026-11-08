@@ -1,5 +1,6 @@
 <?php namespace com\openai\tools;
 
+use ReflectionFunction;
 use com\openai\tools\{Param, Context};
 use lang\reflection\TargetException;
 use lang\{Type, Reflection, Value, IllegalArgumentException};
@@ -10,7 +11,7 @@ use util\{Comparison, Objects};
  *
  * @test com.openai.unittest.FunctionsTest
  */
-class Functions implements Value {
+class Functions extends Definitions implements Value {
   use Comparison;
 
   private $instances= [];
@@ -91,39 +92,28 @@ class Functions implements Value {
           $reflect->optional() || $required[]= $param;
         }
 
-        yield $group.'_'.$name => [
-          'description' => $method->comment() ?? ucfirst($name),
-          'input'       => [
+        yield new Definition(
+          $group.'_'.$name,
+          $method->comment() ?? ucfirst($name),
+          [
             'type'        => 'object',
             'properties'  => $properties ?: (object)[],
             'required'    => $required,
           ],
-        ];
+        );
       }
     }
   }
 
-  /** @return com.openai.tools.Calls */
-  public function calls() { return new Calls($this); }
-
-  /**
-   * Returns target for a given call
-   *
-   * @param  string $call
-   * @return var[]
-   * @throws lang.IllegalArgumentException if there is no such target registered
-   */
-  public function target($call) {
-    sscanf($call, "%[^_]_%[^\r]", $group, $name);
-    if (null === ($method= $this->methods[$group][$name] ?? null)) {
-      throw new IllegalArgumentException(isset($this->methods[$group])
-        ? "Unknown function {$name} in {$group}"
-        : "Unknown group {$group}"
-      );
-    }
+  /** @return ?ReflectionFunction */
+  public function invokeable(string $name, ?string $namespace= null) {
+    sscanf($name, "%[^_]_%[^\r]", $group, $name);
+    if (null === ($method= $this->methods[$group][$name] ?? null)) return null;
 
     // Lazily create instance if not set
-    return [$this->instances[$group][0] ?? $this->instances[$group][1](), $method];
+    return new ReflectionFunction($method->closure(
+      $this->instances[$group][0] ?? $this->instances[$group][1]()
+    ));
   }
 
   /** @return string */

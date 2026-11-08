@@ -1,6 +1,6 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\tools\{Functions, Calls, Context};
+use com\openai\tools\{Functions, Calls, Context, CannotInvoke};
 use lang\{IllegalAccessException, IllegalArgumentException};
 use test\{Assert, Before, Expect, Test, Values};
 
@@ -48,9 +48,14 @@ class CallsTest {
     );
   }
 
-  #[Test, Expect(class: IllegalArgumentException::class, message: 'Missing argument name for greet')]
+  #[Test, Expect(class: CannotInvoke::class, message: "Missing argument 'name' for function 'testing_greet'")]
   public function missing_argument() {
     (new Calls($this->functions))->invoke('testing_greet', []);
+  }
+
+  #[Test, Expect(class: CannotInvoke::class, message: "Exception while invoking function 'testing_greet'")]
+  public function exception_raised() {
+    (new Calls($this->functions))->invoke('testing_greet', ['name' => '']);
   }
 
   #[Test]

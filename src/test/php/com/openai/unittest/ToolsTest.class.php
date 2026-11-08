@@ -55,7 +55,7 @@ class ToolsTest {
         'function' => [
           'name'        => 'greet_world',
           'description' => 'World',
-          'parameters'  => $functions->schema()->current()['input'],
+          'parameters'  => $functions->schema()->current()->input,
         ],
       ]]],
       $result
@@ -73,7 +73,7 @@ class ToolsTest {
         'type'        => 'function',
         'name'        => 'greet_world',
         'description' => 'World',
-        'parameters'  => $functions->schema()->current()['input'],
+        'parameters'  => $functions->schema()->current()->input,
       ]]],
       $result
     );
