@@ -107,7 +107,7 @@ class Functions extends Definitions implements Value {
   }
 
   /** @return ?ReflectionFunction */
-  public function invokeable(string $name, ?string $namespace= null) {
+  public function invocable(string $name, ?string $namespace= null) {
     sscanf($name, "%[^_]_%[^\r]", $group, $name);
     if (null === ($method= $this->methods[$group][$name] ?? null)) return null;
 

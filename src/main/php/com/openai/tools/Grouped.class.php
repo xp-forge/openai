@@ -11,11 +11,11 @@ class Grouped extends Scoped {
   }
 
   /** @return ?ReflectionFunction */
-  public function invokeable(string $name, ?string $namespace= null) {
+  public function invocable(string $name, ?string $namespace= null) {
     if (null !== $namespace) return null;
 
     // Name gets passed in as `[scope]_[function]`
     sscanf($name, "%[^_]_%[^\r]", $scope, $function);
-    return ($tools= $this->tools[$scope] ?? null) ? $tools->invokeable($function, null) : null;
+    return ($tools= $this->tools[$scope] ?? null) ? $tools->invocable($function, null) : null;
   }
 }

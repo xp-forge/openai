@@ -10,5 +10,5 @@ abstract class Definitions {
   public abstract function schema(): iterable;
 
   /** @return ?ReflectionFunction */
-  public abstract function invokeable(string $name, ?string $namespace= null);
+  public abstract function invocable(string $name, ?string $namespace= null);
 }

@@ -205,11 +205,11 @@ class FunctionsTest {
 
   #[Test]
   public function unknown_namespace() {
-    Assert::null((new Functions())->with('testing', Greetings::class)->invokeable('unknown_hello'));
+    Assert::null((new Functions())->with('testing', Greetings::class)->invocable('unknown_hello'));
   }
 
   #[Test]
   public function unknown_method() {
-    Assert::null((new Functions())->with('testing', Greetings::class)->invokeable('testing_unknown'));
+    Assert::null((new Functions())->with('testing', Greetings::class)->invocable('testing_unknown'));
   }
 }

@@ -59,12 +59,12 @@ class Calls {
    */
   public function invoke(string $name, array $named= [], array $context= [], ?string $namespace= null) {
     $compound= $namespace ? $namespace.'::'.$name : $name;
-    if (null === ($invokeable= $this->functions->invokeable($name, $namespace))) {
+    if (null === ($invocable= $this->functions->invocable($name, $namespace))) {
       throw new IllegalArgumentException("Unknown function '{$compound}'");
     }
 
     $pass= [];
-    foreach ($invokeable->getParameters() as $param) {
+    foreach ($invocable->getParameters() as $param) {
       if ($attributes= $param->getAttributes(Context::class)) {
         $arguments= $attributes[0]->getArguments();
         $ptr= &$context;
@@ -91,7 +91,7 @@ class Calls {
     }
 
     try {
-      return $this->marshalling->marshal($invokeable->invokeArgs($pass));
+      return $this->marshalling->marshal($invocable->invokeArgs($pass));
     } catch (Throwable $t) {
       throw new CannotInvoke("Exception while invoking function '{$compound}'", $t);
     }

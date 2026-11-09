@@ -67,7 +67,7 @@ class Named extends Definitions {
   }
 
   /** @return ?ReflectionFunction */
-  public function invokeable(string $name, ?string $namespace= null) {
+  public function invocable(string $name, ?string $namespace= null) {
     return null === $namespace ? $this->functions[$name] ?? null : null;
   }
 }
