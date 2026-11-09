@@ -1,5 +1,6 @@
 <?php namespace com\openai\tools;
 
+/** Base class for Named, Grouped and Namespaced */
 abstract class Definitions {
 
   /** Returns calls instance wired to this definition */
