@@ -6,10 +6,10 @@ use test\{Assert, Test, Values};
 
 /** @deprecated */
 class FunctionsTest {
-  const HELLO_WORLD= ['testing_hello', 'Hello World', [
+  const HELLO_WORLD= ['testing_hello', 'Says hello', [
     'type'       => 'object',
     'properties' => ['name' => ['type' => 'string', 'description' => 'Name']],
-    'required'   => [],
+    'required'   => ['name'],
   ]];
 
   /** For select() test */
@@ -31,7 +31,7 @@ class FunctionsTest {
   public function register() {
     Assert::equals(
       [new Definition(...self::HELLO_WORLD)],
-      [...(new Functions())->register('testing', new HelloWorld())->schema()],
+      [...(new Functions())->register('testing', new Greetings())->schema()],
     );
   }
 
@@ -39,7 +39,7 @@ class FunctionsTest {
   public function with_classname() {
     Assert::equals(
       [new Definition(...self::HELLO_WORLD)],
-      [...(new Functions())->with('testing', HelloWorld::class)->schema()],
+      [...(new Functions())->with('testing', Greetings::class)->schema()],
     );
   }
 
@@ -47,7 +47,7 @@ class FunctionsTest {
   public function with_xpclass() {
     Assert::equals(
       [new Definition(...self::HELLO_WORLD)],
-      [...(new Functions())->with('testing', XPClass::forName('com.openai.unittest.HelloWorld'))->schema()],
+      [...(new Functions())->with('testing', XPClass::forName('com.openai.unittest.Greetings'))->schema()],
     );
   }
 
@@ -195,21 +195,21 @@ class FunctionsTest {
     Assert::equals($expected, $result);
   }
 
-  #[Test, Values([[[], 'Hello World'], [['name' => 'Test'], 'Hello Test']])]
-  public function invoke($arguments, $expected) {
-    $fixture= (new Functions())->with('testing', HelloWorld::class);
-    $result= $fixture->calls()->invoke('testing_hello', $arguments);
+  #[Test]
+  public function invoke() {
+    $fixture= (new Functions())->with('testing', Greetings::class);
+    $result= $fixture->calls()->invoke('testing_hello', ['name' => 'Test']);
 
-    Assert::equals($expected, $result);
+    Assert::equals('Hello Test', $result);
   }
 
   #[Test]
   public function unknown_namespace() {
-    Assert::null((new Functions())->with('testing', HelloWorld::class)->invokeable('unknown_hello'));
+    Assert::null((new Functions())->with('testing', Greetings::class)->invokeable('unknown_hello'));
   }
 
   #[Test]
   public function unknown_method() {
-    Assert::null((new Functions())->with('testing', HelloWorld::class)->invokeable('testing_unknown'));
+    Assert::null((new Functions())->with('testing', Greetings::class)->invokeable('testing_unknown'));
   }
 }
