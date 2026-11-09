@@ -4,6 +4,7 @@ use com\openai\tools\{Functions, Param, Context, Definition};
 use lang\XPClass;
 use test\{Assert, Test, Values};
 
+/** @deprecated */
 class FunctionsTest {
   const HELLO_WORLD= ['testing_hello', 'Hello World', [
     'type'       => 'object',

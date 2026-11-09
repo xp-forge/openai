@@ -9,6 +9,7 @@ use util\{Comparison, Objects};
 /**
  * Function calling
  *
+ * @deprecated Use `Named`, `Grouped` or `Namespaced` instead
  * @test com.openai.unittest.FunctionsTest
  */
 class Functions extends Definitions implements Value {
