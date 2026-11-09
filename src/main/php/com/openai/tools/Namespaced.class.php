@@ -4,7 +4,7 @@
 class Namespaced extends Scoped {
 
   /** Returns schema for these functions */
-  public function schema() {
+  public function schema(): iterable {
     foreach ($this->tools as $namespace => $tools) {
       yield [
         'type'        => 'namespace',

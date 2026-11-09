@@ -4,7 +4,7 @@
 class Grouped extends Scoped {
 
   /** Returns schema for these functions */
-  public function schema() {
+  public function schema(): iterable {
     foreach ($this->tools as $scope => $tools) {
       yield from $tools->schema($scope.'_');
     }

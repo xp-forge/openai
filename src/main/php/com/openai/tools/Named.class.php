@@ -37,7 +37,7 @@ class Named extends Definitions {
   }
 
   /** Returns schema for these functions */
-  public function schema($prefix= '') {
+  public function schema($prefix= ''): iterable {
     foreach ($this->functions as $name => $reflect) {
       $properties= $required= [];
       foreach ($reflect->getParameters() as $param) {

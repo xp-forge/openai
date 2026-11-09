@@ -7,7 +7,7 @@ abstract class Definitions {
   public function calls(): Calls { return new Calls($this); }
 
   /** Returns schema for these functions */
-  public abstract function schema();
+  public abstract function schema(): iterable;
 
   /** @return ?ReflectionFunction */
   public abstract function invokeable(string $name, ?string $namespace= null);
