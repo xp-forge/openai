@@ -1,6 +1,6 @@
 <?php namespace com\openai\tools;
 
-use ReflectionFunction;
+use ReflectionFunction, ReflectionMethod;
 use lang\Reflection;
 
 /** @test com.openai.unittest.NamedTest */
@@ -8,32 +8,36 @@ class Named extends Definitions {
   private $functions= [];
   public $description= null;
 
-  /** @param [:callable]|object $arg */
+  /** @param [:callable]|com.openai.tools.Instances|object $arg */
   public function __construct($arg, ?string $description= null) {
     if (is_array($arg)) {
       foreach ($arg as $name => $closure) {
-        $this->functions[$name]= new ReflectionFunction($closure);
+        $this->functions[$name]= [new ReflectionFunction($closure), null];
       }
       $this->description= $description;
+    } else if ($arg instanceof Instances) {
+      $this->description= $description ?? $arg->type->comment();
+      foreach ($arg->type->methods() as $method) {
+        $m= $method->modifiers();
+        if ($m->isPublic() && !$m->isStatic()) {
+          $this->functions[$method->name()]= [new ReflectionMethod($arg->type->literal(), $method->name()), $arg->new];
+        }
+      }
     } else {
       $type= Reflection::type($arg);
-
-      // Use API doc comment for description if none is given
-      $this->description= $description ?? $type->comment();
-
-      // Constructors, destructors, interceptors and other special methods use a `__` prefix
       foreach ($type->methods() as $method) {
         $m= $method->modifiers();
         if ($m->isPublic() && !$m->isStatic()) {
-          $this->functions[$method->name()]= new ReflectionFunction($method->closure($arg));
+          $this->functions[$method->name()]= [new ReflectionFunction($method->closure($arg)), null];
         }
       }
+      $this->description= $description ?? $type->comment();
     }
   }
 
   /** Returns schema for these functions */
   public function schema($prefix= ''): iterable {
-    foreach ($this->functions as $name => $reflect) {
+    foreach ($this->functions as $name => [$reflect, $instance]) {
       $properties= $required= [];
       foreach ($reflect->getParameters() as $param) {
         if ($param->getAttributes(Context::class)) {
@@ -63,7 +67,13 @@ class Named extends Definitions {
 
   /** @return ?ReflectionFunction */
   public function invocable(string $name, ?string $namespace= null) {
-    return null === $namespace ? $this->functions[$name] ?? null : null;
+    if (null === $namespace && ($function= $this->functions[$name] ?? null)) {
+      return $function[1]
+        ? new ReflectionFunction($function[0]->getClosure($function[1]()))
+        : $function[0]
+      ;
+    }
+    return null;
   }
 
   /** @return string */
