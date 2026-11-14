@@ -1,7 +1,11 @@
 <?php namespace com\openai\tools;
 
+use lang\Value;
+use util\Comparison;
+
 /** Base class for Named, Grouped and Namespaced */
-abstract class Definitions {
+abstract class Definitions implements Value {
+  use Comparison;
 
   /** Returns calls instance wired to this definition */
   public function calls(): Calls { return new Calls($this); }

@@ -23,4 +23,19 @@ abstract class Scoped extends Definitions {
     $this->tools[$scope]= $impl instanceof Named ? $impl : new Named($impl);
     return $this;
   }
+
+  /** @return string */
+  public function toString() {
+    $s= nameof($this)."('{$this->description}')";
+    if (empty($this->tools)) return $s.' {}';
+
+    $s.= " {\n";
+    foreach ($this->tools as $scope => $definitions) {
+      $s.= "  - {$scope}\n";
+      foreach ($definition->schema() as $definition) {
+        $s.= "    {$definition->name}(): {$description->description}\n";
+      }
+    }
+    return $s."\n}";
+  }
 }

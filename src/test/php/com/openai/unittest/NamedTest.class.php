@@ -34,4 +34,27 @@ class NamedTest {
       ->invoke('hello', ['name' => 'Test'], [], namespace: null)
     );
   }
+
+  #[Test]
+  public function empty_string_representation() {
+    Assert::equals('com.openai.tools.Named {}', (new Named([]))->toString());
+  }
+
+  #[Test]
+  public function string_representation() {
+    $impl= [
+      'print' => /** Prints a value */ fn($value) => true,
+      'find'  => /** Finds files and folders */ fn($base, $pattern) => true,
+      'test'  => /** Tests an expression */ fn($expr) => true,
+    ];
+
+    Assert::equals(
+      "com.openai.tools.Named {\n".
+      "  print(): Prints a value\n".
+      "  find(): Finds files and folders\n".
+      "  test(): Tests an expression\n".
+      "}",
+      (new Named($impl))->toString()
+    );
+  }
 }

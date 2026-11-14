@@ -65,4 +65,17 @@ class Named extends Definitions {
   public function invocable(string $name, ?string $namespace= null) {
     return null === $namespace ? $this->functions[$name] ?? null : null;
   }
+
+  /** @return string */
+  public function toString() {
+    $s= nameof($this);
+    null === $this->description || $s.= "('{$this->description}')";
+    if (empty($this->functions)) return $s.' {}';
+
+    $s.= " {\n";
+    foreach ($this->schema() as $definition) {
+      $s.= '  '.$definition->name.'(): '.$definition->description."\n";
+    }
+    return $s.'}';
+  }
 }
