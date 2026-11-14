@@ -1,9 +1,5 @@
 <?php namespace com\openai\tools;
 
-use ReflectionFunction;
-use com\openai\tools\{Param, Context};
-use lang\reflection\TargetException;
-use lang\{Type, Reflection, Value, IllegalArgumentException};
 use util\Objects;
 
 /**
@@ -11,7 +7,7 @@ use util\Objects;
  *
  * @test com.openai.unittest.FunctionsTest
  */
-class Functions extends Definitions implements Value {
+class Functions extends Definitions {
   private $definitions= [];
 
   /** Creates functions from given definitions */
@@ -37,9 +33,9 @@ class Functions extends Definitions implements Value {
   /** @return string */
   public function toString() {
     $s= nameof($this);
-    if (empty($this->definitions)) return $s.'(0) []';
+    if (empty($this->definitions)) return $s.' []';
 
-    $s= nameof($this).'('.sizeof($this->definitions).") [\n";
+    $s= nameof($this)." [\n";
     foreach ($this->definitions as $definitions) {
       $s.= '  '.Objects::stringOf($definitions, '  ')."\n";
     }

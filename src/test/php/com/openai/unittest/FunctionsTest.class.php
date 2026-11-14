@@ -51,7 +51,7 @@ class FunctionsTest {
   #[Test]
   public function empty_string_representation() {
     Assert::equals(
-      'com.openai.tools.Functions(0) []',
+      'com.openai.tools.Functions []',
       (new Functions())->toString()
     );
   }
@@ -59,7 +59,7 @@ class FunctionsTest {
   #[Test]
   public function string_representation() {
     Assert::equals(
-      "com.openai.tools.Functions(1) [\n".
+      "com.openai.tools.Functions [\n".
       "  com.openai.tools.Named('Global functions') {}\n".
       "]",
       (new Functions(new Named([], 'Global functions')))->toString()
