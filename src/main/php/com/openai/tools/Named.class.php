@@ -1,6 +1,7 @@
 <?php namespace com\openai\tools;
 
-use ReflectionObject, ReflectionFunction;
+use ReflectionFunction;
+use lang\Reflection;
 
 /** @test com.openai.unittest.NamedTest */
 class Named extends Definitions {
@@ -15,22 +16,16 @@ class Named extends Definitions {
       }
       $this->description= $description;
     } else {
-      $reflect= new ReflectionObject($arg);
+      $type= Reflection::type($arg);
 
       // Use API doc comment for description if none is given
-      if (null !== $description) {
-        $this->description= $description;
-      } else if ($comment= $reflect->getDocComment()) {
-        $this->description= preg_replace(
-          ['/^\/\*\* ?/', '/\n\s+\* ?/', '/ ?\*\/$/'], ['', "\n", ''],
-          $comment
-        );
-      }
+      $this->description= $description ?? $type->comment();
 
       // Constructors, destructors, interceptors and other special methods use a `__` prefix
-      foreach ($reflect->getMethods() as $method) {
-        if ($method->isPublic() && !$method->isStatic() && 0 !== strncmp($method->name, '__', 2)) {
-          $this->functions[$method->name]= new ReflectionFunction($method->getClosure($arg));
+      foreach ($type->methods() as $method) {
+        $m= $method->modifiers();
+        if ($m->isPublic() && !$m->isStatic()) {
+          $this->functions[$method->name()]= new ReflectionFunction($method->closure($arg));
         }
       }
     }
