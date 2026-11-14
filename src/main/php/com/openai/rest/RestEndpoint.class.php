@@ -1,6 +1,6 @@
 <?php namespace com\openai\rest;
 
-use com\openai\tools\{Tools, Functions};
+use com\openai\tools\Tools;
 
 /** Base class for OpenAI and AzureAI implementations */
 abstract class RestEndpoint extends ApiEndpoint {
@@ -9,22 +9,12 @@ abstract class RestEndpoint extends ApiEndpoint {
   /** @param webservices.rest.Endpoint */
   public function __construct($endpoint) {
     $this->endpoint= $endpoint;
-    $this->endpoint->marshalling->mapping(Tools::class, function($tools) {
-      foreach ($tools->selection as $select) {
-        if ($select instanceof Functions) {
-          foreach ($select->schema() as $name => $function) {
-            yield [
-              'type'        => 'function',
-              'name'        => $name,
-              'description' => $function['description'],
-              'parameters'  => $function['input'],
-            ];
-          }
-        } else {
-          yield $select;
-        }
-      }
-    });
+    $this->endpoint->marshalling= Tools::marshalling(fn($definition) => [
+      'type'        => 'function',
+      'name'        => $definition->name,
+      'description' => $definition->description,
+      'parameters'  => $definition->input,
+    ]);
     $this->rateLimit= new RateLimit();
   }
 

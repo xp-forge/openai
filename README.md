@@ -185,9 +185,9 @@ Custom functions are registered in a `Functions` instance and passed via *tools*
 
 ```php
 use com\openai\rest\OpenAIEndpoint;
-use com\openai\tools\{Tools, Functions};
+use com\openai\tools\{Tools, Grouped};
 
-$functions= (new Functions())->register('weather', new Weather());
+$functions= new Grouped()->add('weather', new Weather());
 
 $ai= new OpenAIEndpoint('https://'.getenv('OPENAI_API_KEY').'@api.openai.com/v1');
 $payload= [
@@ -196,6 +196,8 @@ $payload= [
   'input' => [['type' => 'message', 'role' => 'user', 'content' => $content]],
 ];
 ```
+
+To define [namespaces](https://developers.openai.com/api/docs/guides/function-calling#defining-namespaces), use `Namespaced` instead of `Grouped`.
 
 ### Invoking custom functions
 

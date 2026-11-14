@@ -1,6 +1,6 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\tools\{Functions, Calls, Context};
+use com\openai\tools\{Grouped, Calls, Context, CannotInvoke};
 use lang\{IllegalAccessException, IllegalArgumentException};
 use test\{Assert, Before, Expect, Test, Values};
 
@@ -9,15 +9,10 @@ class CallsTest {
 
   #[Before]
   public function functions() {
-    $this->functions= (new Functions())->register('testing', new class() {
+    $this->functions= (new Grouped())->add('testing', new class() {
 
       /** Greets the user */
-      public function greet(
-        #[Param]
-        $name,
-        #[Context('phrase')]
-        $greeting= 'Hello'
-      ) {
+      public function greet(#[Param] $name, #[Context('phrase')] $greeting= 'Hello') {
         if (empty($name)) {
           throw new IllegalAccessException('Name may not be empty!');
         }
@@ -48,9 +43,14 @@ class CallsTest {
     );
   }
 
-  #[Test, Expect(class: IllegalArgumentException::class, message: 'Missing argument name for greet')]
+  #[Test, Expect(class: CannotInvoke::class, message: "Missing argument 'name' for function 'testing_greet'")]
   public function missing_argument() {
     (new Calls($this->functions))->invoke('testing_greet', []);
+  }
+
+  #[Test, Expect(class: CannotInvoke::class, message: "Exception while invoking function 'testing_greet'")]
+  public function exception_raised() {
+    (new Calls($this->functions))->invoke('testing_greet', ['name' => '']);
   }
 
   #[Test]

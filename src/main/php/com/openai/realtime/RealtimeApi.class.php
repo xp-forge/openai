@@ -1,9 +1,8 @@
 <?php namespace com\openai\realtime;
 
-use com\openai\tools\{Tools, Functions};
+use com\openai\tools\Tools;
 use lang\{IllegalStateException, Value};
 use text\json\Json;
-use util\data\Marshalling;
 use util\log\Traceable;
 use util\{Comparison, URI};
 use websocket\WebSocket;
@@ -41,22 +40,12 @@ class RealtimeApi implements Traceable, Value {
       $this->ws= new WebSocket($endpoint);
     }
 
-    $this->marshalling= (new Marshalling())->mapping(Tools::class, function($tools) {
-      foreach ($tools->selection as $select) {
-        if ($select instanceof Functions) {
-          foreach ($select->schema() as $name => $function) {
-            yield [
-              'type'        => 'function',
-              'name'        => $name,
-              'description' => $function['description'],
-              'parameters'  => $function['input'],
-            ];
-          }
-        } else {
-          yield $select;
-        }
-      }
-    });
+    $this->marshalling= Tools::marshalling(fn($definition) => [
+      'type'        => 'function',
+      'name'        => $definition->name,
+      'description' => $definition->description,
+      'parameters'  => $definition->input,
+    ]);
   }
 
   /** @return string */

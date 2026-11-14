@@ -1,5 +1,7 @@
 <?php namespace com\openai\tools;
 
+use util\data\Marshalling;
+
 /**
  * Tools incorporate the builtins like `code_interpreter` but also custom
  * functions declared via `Functions` registry.
@@ -20,5 +22,26 @@ class Tools {
     foreach ($selected as $select) {
       $this->selection[]= is_string($select) ? ['type' => $select] : $select;
     }
+  }
+
+  /**
+   * Returns marshalling
+   *
+   * @param  function(util.data.Definition): [:var] $definitions
+   * @return util.data.Marshallling
+   */
+  public static function marshalling($definitions) {
+    return (new Marshalling())
+      ->mapping(Definition::class, $definitions)
+      ->mapping(self::class, function($tools) {
+        foreach ($tools->selection as $select) {
+          if ($select instanceof Definitions) {
+            yield from $select->schema();
+          } else {
+            yield $select;
+          }
+        }
+      })
+    ;
   }
 }
