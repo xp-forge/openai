@@ -2,7 +2,7 @@
 
 use com\openai\realtime\RealtimeApi;
 use com\openai\rest\OpenAIEndpoint;
-use com\openai\tools\{Tools, Functions};
+use com\openai\tools\{Tools, Grouped};
 use test\{Assert, Test, Values};
 use webservices\rest\TestEndpoint;
 
@@ -21,10 +21,8 @@ class ToolsTest {
   }
 
   /** Returns functions with a "Hello World!" registration */
-  private function functions(): Functions {
-    return (new Functions())->register('greet', new class() {
-      public function world($name= 'World') { return "Hello {$name}!"; }
-    });
+  private function functions(): Grouped {
+    return new Grouped(new Greetings());
   }
 
   #[Test]
@@ -53,8 +51,8 @@ class ToolsTest {
       ['tools' => [[
         'type'     => 'function',
         'function' => [
-          'name'        => 'greet_world',
-          'description' => 'World',
+          'name'        => 'greetings_hello',
+          'description' => 'Says hello',
           'parameters'  => $functions->schema()->current()->input,
         ],
       ]]],
@@ -71,8 +69,8 @@ class ToolsTest {
     Assert::equals(
       ['tools' => [[
         'type'        => 'function',
-        'name'        => 'greet_world',
-        'description' => 'World',
+        'name'        => 'greetings_hello',
+        'description' => 'Says hello',
         'parameters'  => $functions->schema()->current()->input,
       ]]],
       $result
@@ -87,14 +85,14 @@ class ToolsTest {
       '{"type": "session.update", "session": {
         "tools": [{
           "type": "function",
-          "name": "greet_world",
-          "description": "World",
+          "name": "greetings_hello",
+          "description": "Says hello",
           "parameters": {
             "type": "object",
             "properties": {
               "name": {"type": "string", "description": "Name"}
             },
-            "required": []
+            "required": ["name"]
           }
         }]
       }}',
