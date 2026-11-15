@@ -4,7 +4,21 @@ use com\openai\{Encoder, Encoding};
 use test\{Assert, Before, Test};
 
 class EncoderTest {
-  const VOCABULARY= ['!' => 0, ' ' => 220, 'Test' => 2323, 'mm' => 3906, 'Ti' => 46451];
+  const VOCABULARY= [
+    'a'    => 10,
+    'b'    => 11,
+    'c'    => 12,
+    'ab'   => 4,
+    'bc'   => 2,
+    '1'    => 40,
+    '2'    => 41,
+    '12'   => 5,
+    '!'    => 0,
+    ' '    => 220,
+    'mm'   => 3906,
+    'Ti'   => 46451,
+    'Test' => 2323,
+  ];
 
   private $encoding;
 
@@ -46,6 +60,16 @@ class EncoderTest {
   public function byte_pairs_merged() {
     $encoder= new Encoder(self::VOCABULARY, $this->encoding);
     Assert::equals([220, 46451, 3906], [...$encoder->encode(' Timm')]);
+  }
+
+  #[Test]
+  public function merges_lowest_ranked_pair_first() {
+    Assert::equals([10, 2], [...(new Encoder(self::VOCABULARY, $this->encoding))->encode('abc')]);
+  }
+
+  #[Test]
+  public function whole_word_token_takes_precedence() {
+    Assert::equals([5], [...(new Encoder(self::VOCABULARY, $this->encoding))->encode('12')]);
   }
 
   #[Test]
