@@ -41,4 +41,14 @@ class TikTokenFilesInTest {
       iterator_to_array((new TikTokenFilesIn($this->file->path))->tokens($this->file->filename))
     );
   }
+  #[Test]
+  public function reads_long_token_lines() {
+    $token= str_repeat('a', 1600);
+    $file= (new TempFile())->containing(base64_encode($token)." 42\n");
+    Assert::equals(
+      [$token => 42],
+      iterator_to_array((new TikTokenFilesIn($file->path))->tokens($file->filename))
+    );
+  }
+
 }
