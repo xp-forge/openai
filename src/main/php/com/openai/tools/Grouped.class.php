@@ -10,7 +10,7 @@ class Grouped extends Scoped {
     }
   }
 
-  /** @return ?ReflectionFunction */
+  /** @return ?lang.reflection.Invocable */
   public function invocable(string $name, ?string $namespace= null) {
     if (null !== $namespace) return null;
 

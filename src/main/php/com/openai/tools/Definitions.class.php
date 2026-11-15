@@ -13,6 +13,6 @@ abstract class Definitions implements Value {
   /** Returns schema for these functions */
   public abstract function schema(): iterable;
 
-  /** @return ?ReflectionFunction */
+  /** @return ?lang.reflection.Invocable */
   public abstract function invocable(string $name, ?string $namespace= null);
 }

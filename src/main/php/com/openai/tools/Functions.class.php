@@ -22,7 +22,7 @@ class Functions extends Definitions {
     }
   }
 
-  /** @return ?ReflectionFunction */
+  /** @return ?lang.reflection.Invocable */
   public function invocable(string $name, ?string $namespace= null) {
     foreach ($this->definitions as $definitions) {
       if ($invocable= $definitions->invocable($name, $namespace)) return $invocable;

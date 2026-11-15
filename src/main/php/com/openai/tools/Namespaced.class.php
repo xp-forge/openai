@@ -15,7 +15,7 @@ class Namespaced extends Scoped {
     }
   }
 
-  /** @return ?ReflectionFunction */
+  /** @return ?lang.reflection.Invocable */
   public function invocable(string $name, ?string $namespace= null) {
     return ($tools= $this->tools[$namespace] ?? null) ? $tools->invocable($name, null) : null;
   }

@@ -2,7 +2,7 @@
 
 use Throwable as Any;
 use lang\reflection\TargetException;
-use lang\{Type, Nullable, Throwable, IllegalArgumentException};
+use lang\{Throwable, IllegalArgumentException};
 use text\json\Json;
 use util\data\Marshalling;
 
@@ -64,36 +64,29 @@ class Calls {
     }
 
     $pass= [];
-    foreach ($invocable->getParameters() as $param) {
-      if ($attributes= $param->getAttributes(Context::class)) {
-        $arguments= $attributes[0]->getArguments();
+    foreach ($invocable->parameters() as $param => $reflect) {
+      if ($annotation= $reflect->annotation(Context::class)) {
+        $arguments= $annotation->arguments();
         $ptr= &$context;
-        $select= $arguments['name'] ?? $arguments[0] ?? $param->name;
+        $select= $arguments['name'] ?? $arguments[0] ?? $param;
       } else {
         $ptr= &$named;
-        $select= $param->name;
+        $select= $param;
       }
 
       if (array_key_exists($select, $ptr)) {
-        if (null === ($t= $param->getType())) {
-          $type= Type::$VAR;
-        } else if ($t->allowsNull()) {
-          $type= new Nullable(Type::forName($t->getName()));
-        } else {
-          $type= Type::forName($t->getName());
-        }
-        $pass[$param->name]= $this->marshalling->unmarshal($ptr[$select], $type);
-      } else if ($param->isOptional()) {
-        $pass[$param->name]= $param->getDefaultValue();
+        $pass[$param]= $this->marshalling->unmarshal($ptr[$select], $reflect->constraint()->type());
+      } else if ($reflect->optional()) {
+        $pass[$param]= $reflect->default();
       } else {
         throw new CannotInvoke("Missing argument '{$select}' for function '{$compound}'");
       }
     }
 
     try {
-      return $this->marshalling->marshal($invocable->invokeArgs($pass));
-    } catch (Throwable $t) {
-      throw new CannotInvoke("Exception while invoking function '{$compound}'", $t);
+      return $this->marshalling->marshal($invocable->invoke($pass));
+    } catch (TargetException $t) {
+      throw new CannotInvoke("Exception while invoking function '{$compound}'", $t->getCause());
     }
   }
 
