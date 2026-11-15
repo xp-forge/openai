@@ -3,6 +3,11 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 1.1.0 / 2026-11-15
+
+* Merged PR #29: Implement byte-pair merge correctly using priority queue
+  (@thekid, GPT-6.1-Terra)
+
 ## 1.0.0 / 2026-11-01
 
 * **Heads up:** Dropped support for PHP < 7.4, see xp-framework/rfc#343
