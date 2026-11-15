@@ -62,6 +62,15 @@ class CallsTest {
   }
 
   #[Test]
+  public function call_without_arguments() {
+    $functions= (new Grouped())->add('testing', ['greet' => fn($name= 'World') => "Hello {$name}"]);
+    Assert::equals(
+      '"Hello World"',
+      (new Calls($functions))->call('testing_greet', '{}')
+    );
+  }
+
+  #[Test]
   public function call_invalid_json() {
     Assert::equals(
       '{"error":"lang.FormatException","message":"Unclosed string "}',

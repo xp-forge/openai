@@ -97,7 +97,7 @@ class Calls {
    */
   public function call(string $name, string $arguments, array $context= [], ?string $namespace= null): string {
     try {
-      $result= $this->invoke($name, Json::read($arguments), $context, $namespace);
+      $result= $this->invoke($name, (array)Json::read($arguments), $context, $namespace);
     } catch (CannotInvoke $e) {
       $result= $this->error($e->getCause());
     } catch (Any $e) {
