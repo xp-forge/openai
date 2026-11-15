@@ -19,6 +19,18 @@ class EncoderTest {
   }
 
   #[Test]
+  public function size_reflects_vocabulary() {
+    Assert::equals(sizeof(self::VOCABULARY), (new Encoder(self::VOCABULARY, $this->encoding))->size());
+  }
+
+  #[Test]
+  public function empty_input_produces_no_tokens() {
+    $encoder= new Encoder(self::VOCABULARY, $this->encoding);
+    Assert::equals([], [...$encoder->encode('')]);
+    Assert::equals(0, $encoder->count(''));
+  }
+
+  #[Test]
   public function encode_single() {
     $encoder= new Encoder(self::VOCABULARY, $this->encoding);
     Assert::equals([0], [...$encoder->encode('!')]);
