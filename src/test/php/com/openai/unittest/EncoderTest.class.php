@@ -1,6 +1,7 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\{Encoder, Encoding};
+use lang\{IllegalArgumentException, IllegalStateException};
 use test\{Assert, Before, Test};
 
 class EncoderTest {
@@ -77,4 +78,41 @@ class EncoderTest {
     $encoder= new Encoder(self::VOCABULARY, $this->encoding);
     Assert::equals(4, $encoder->count('Test Timm'));
   }
+  #[Test]
+  public function merges_across_long_word_boundary() {
+    $encoder= new Encoder(self::VOCABULARY, $this->encoding);
+    $text= str_repeat('a', 99).'bc';
+    Assert::equals([...array_fill(0, 99, 10), 2], [...$encoder->encode($text)]);
+    Assert::equals(100, $encoder->count($text));
+  }
+
+  #[Test]
+  public function tied_pairs_merge_from_the_left() {
+    $encoder= new Encoder(['a' => 10, 'aa' => 1], $this->encoding);
+    Assert::equals([1, 10], [...$encoder->encode('aaa')]);
+  }
+
+  #[Test]
+  public function newly_formed_pairs_take_priority() {
+    $encoder= new Encoder(
+      ['a' => 10, 'b' => 11, 'c' => 12, 'd' => 13, 'ab' => 2, 'bc' => 3, 'cd' => 4, 'abc' => 1],
+      $this->encoding
+    );
+    Assert::equals([1, 13], [...$encoder->encode('abcd')]);
+  }
+
+  #[Test]
+  public function malformed_utf8_is_rejected() {
+    $encoder= new Encoder(self::VOCABULARY, $this->encoding);
+    Assert::throws(IllegalArgumentException::class, fn() => [...$encoder->encode("a\xffb")]);
+    Assert::throws(IllegalArgumentException::class, fn() => $encoder->count("a\xffb"));
+  }
+
+  #[Test]
+  public function missing_vocabulary_bytes_are_rejected() {
+    $encoder= new Encoder(self::VOCABULARY, $this->encoding);
+    Assert::throws(IllegalStateException::class, fn() => [...$encoder->encode('az')]);
+    Assert::throws(IllegalStateException::class, fn() => $encoder->count('az'));
+  }
+
 }

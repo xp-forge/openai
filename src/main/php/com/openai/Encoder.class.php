@@ -1,5 +1,8 @@
 <?php namespace com\openai;
 
+use SplPriorityQueue;
+use lang\{IllegalArgumentException, IllegalStateException};
+
 /**
  * SimpleBytePairEncoding
  *
@@ -11,13 +14,11 @@
 class Encoder {
   private $vocabulary= [];
   private $pattern;
-  private $max= 100; // Limit from the Rust implementation
 
   /** Creates a new encoder from a given vocabulary and pattern to split the text on */
   public function __construct(iterable $vocabulary, Encoding $encoding) {
     foreach ($vocabulary as $token => $rank) {
       $this->vocabulary[$token]= $rank;
-      strlen($token) > $this->max && $this->max= strlen($token);
     }
     $this->pattern= $encoding->pattern();
   }
@@ -29,46 +30,62 @@ class Encoder {
    * Merge byte pairs in a given word
    *
    * @param  string $word
-   * @return string[]
+   * @return iterable
    */
   private function merge($word) {
-    $r= [];
-    foreach (str_split($word, $this->max) as $chunk) {
-      $parts= str_split($chunk, 1);
-      do {
-
-        // Iterate over all pairs and find the pair we want to merge the most
-        $l= sizeof($parts);
-        $min= $pos= null;
-        for ($i= 0; $i < $l - 1; $i++) {
-          $rank= $this->vocabulary[$parts[$i].$parts[$i + 1]] ?? null;
-          if (null !== $rank && (null === $min || $rank < $min)) {
-            $min= $rank;
-            $pos= $i;
-          }
-        }
-
-        // If there were no pairs we could merge, we're done!
-        if (null === $min) break;
-
-        // Otherwise, merge that pair and leave the rest unchanged. Then repeat.
-        $parts= [...array_slice($parts, 0, $pos), $parts[$pos].$parts[$pos + 1], ...array_slice($parts, $pos + 2)];
-      } while (true);
-
-      foreach ($parts as $part) $r[]= $part;
+    $parts= str_split($word);
+    $size= sizeof($parts);
+    $previous= $next= $versions= [];
+    for ($i= 0; $i < $size; $i++) {
+      $previous[$i]= $i - 1;
+      $next[$i]= $i + 1 < $size ? $i + 1 : -1;
+      $versions[$i]= 0;
     }
-    return $r;
+
+    // Queue adjacent pairs by rank, with the leftmost pair winning ties.
+    // Versions discard candidates invalidated by a previous merge.
+    $queue= new SplPriorityQueue();
+    $add= function($left) use (&$parts, &$next, &$versions, $queue) {
+      if ($left < 0 || -1 === ($right= $next[$left])) return;
+      $rank= $this->vocabulary[$parts[$left].$parts[$right]] ?? null;
+      if (null !== $rank) {
+        $queue->insert([$left, $right, $versions[$left], $versions[$right]], [-$rank, -$left]);
+      }
+    };
+    for ($i= 0; $i < $size - 1; $i++) $add($i);
+
+    while (!$queue->isEmpty()) {
+      [$left, $right, $leftVersion, $rightVersion]= $queue->extract();
+      if ($next[$left] !== $right || $versions[$left] !== $leftVersion || $versions[$right] !== $rightVersion) continue;
+
+      $parts[$left].= $parts[$right];
+      $versions[$left]++;
+      $next[$left]= $next[$right];
+      if (-1 !== $next[$right]) $previous[$next[$right]]= $left;
+      $add($previous[$left]);
+      $add($left);
+    }
+
+    for ($i= 0; $i < $size; $i= $next[$i]) {
+      yield $parts[$i];
+      if (-1 === $next[$i]) break;
+    }
   }
 
   /** Encodes a given text, returning a list of tokens */
   public function encode(string $text): iterable {
-    preg_match_all($this->pattern, $text, $words);
+    if (false === preg_match_all($this->pattern, $text, $words)) {
+      $e= new IllegalArgumentException('Cannot split text');
+      \xp::gc(__FILE__);
+      throw $e;
+    }
+
     foreach ($words[0] as $word) {
-      if (isset($this->vocabulary[$word])) {
-        yield $this->vocabulary[$word];
+      if ($token= $this->vocabulary[$word] ?? null) {
+        yield $token;
       } else {
         foreach ($this->merge($word) as $part) {
-          yield $this->vocabulary[$part];
+          yield $this->vocabulary[$part] ?? throw new IllegalStateException('Unknown token '.bin2hex($part));
         }
       }
     }
@@ -76,11 +93,6 @@ class Encoder {
 
   /** Encodes a given text and returns number of tokens */
   public function count(string $text): int {
-    preg_match_all($this->pattern, $text, $words);
-    $c= 0;
-    foreach ($words[0] as $word) {
-      $c+= isset($this->vocabulary[$word]) ? 1 : sizeof($this->merge($word));
-    }
-    return $c;
+    return iterator_count($this->encode($text));
   }
 }

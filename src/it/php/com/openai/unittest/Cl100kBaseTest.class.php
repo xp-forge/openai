@@ -32,5 +32,6 @@ class Cl100kBaseTest {
   #[Test, Values(from: 'fixtures')]
   public function encode($text, $expected) {
     Assert::equals($expected, [...$this->encoder->encode($text)]);
+    Assert::equals(sizeof($expected), $this->encoder->count($text));
   }
 }
