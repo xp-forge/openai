@@ -73,7 +73,7 @@ class Encoding extends Enum {
   public function pattern(): string { return self::$definitions[$this->name]['pattern']; }
 
   /** Returns special tokens encoding */
-  public function special(): string { return self::$definitions[$this->name]['special']; }
+  public function special(): array { return self::$definitions[$this->name]['special']; }
 
   /** Loads encoder with vocabulary from a given source */
   public function load(Source $source): Encoder {
