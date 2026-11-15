@@ -29,7 +29,7 @@ class Encoding extends Enum {
         '<|endoftext|>'   => 100257,
         '<|fim_prefix|>'  => 100258,
         '<|fim_middle|>'  => 100259,
-        '<|fim_middle|>'  => 100260,
+        '<|fim_suffix|>'  => 100260,
         '<|endofprompt|>' => 100276,
       ],
     ],
@@ -73,7 +73,7 @@ class Encoding extends Enum {
   public function pattern(): string { return self::$definitions[$this->name]['pattern']; }
 
   /** Returns special tokens encoding */
-  public function special(): string { return self::$definitions[$this->name]['special']; }
+  public function special(): array { return self::$definitions[$this->name]['special']; }
 
   /** Loads encoder with vocabulary from a given source */
   public function load(Source $source): Encoder {
