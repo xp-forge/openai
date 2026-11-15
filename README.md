@@ -60,7 +60,7 @@ $source= new TikTokenFilesIn('.');
 $tokens= Encoding::named('cl100k_base')->load($source)->encode('Hello World!');
 ```
 
-Instead of *encode()*, you can use *count()* to count the number of tokens.
+Instead of *encode()*, you can use *count()* to count the number of tokens. Both methods require valid UTF-8 input. Special token strings are treated as ordinary text; encoding them as special tokens is not supported.
 
 Embeddings
 ----------
