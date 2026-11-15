@@ -4,7 +4,7 @@
 abstract class Scoped extends Definitions {
   protected $tools= [];
 
-  /** @param [:(com.openai.tools.Named|[:callable]|object)]|object $arg */
+  /** @param [:(parent|[:callable]|object)]|object $arg */
   public function __construct($arg= []) {
     if (is_array($arg)) {
       foreach ($arg as $scope => $impl) {
@@ -18,9 +18,9 @@ abstract class Scoped extends Definitions {
     }
   }
 
-  /** @param com.openai.tools.Named|[:callable]|object $impl */
+  /** @param parent|[:callable]|object $impl */
   public function add(string $scope, $impl, bool $defer= false): self {
-    $this->tools[$scope]= [$impl instanceof Named ? $impl : new Named($impl), $defer];
+    $this->tools[$scope]= [$impl instanceof parent ? $impl : new Named($impl), $defer];
     return $this;
   }
 
