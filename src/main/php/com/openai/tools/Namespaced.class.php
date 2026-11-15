@@ -5,18 +5,20 @@ class Namespaced extends Scoped {
 
   /** Returns schema for these functions */
   public function schema(): iterable {
-    foreach ($this->tools as $namespace => $tools) {
-      yield [
+    foreach ($this->tools as $namespace => [$definitions, $defer]) {
+      $definition= [
         'type'        => 'namespace',
         'name'        => $namespace,
-        'description' => $tools->description ?? ucfirst($namespace),
-        'tools'       => [...$tools->schema()],
+        'description' => $definitions->description ?? ucfirst($namespace),
+        'tools'       => [...$definitions->schema()],
       ];
+      $defer && $definition['defer_loading']= true;
+      yield $definition;
     }
   }
 
   /** @return ?lang.reflection.Invocable */
   public function invocable(string $name, ?string $namespace= null) {
-    return ($tools= $this->tools[$namespace] ?? null) ? $tools->invocable($name, null) : null;
+    return ($tools= $this->tools[$namespace] ?? null) ? $tools[0]->invocable($name, null) : null;
   }
 }

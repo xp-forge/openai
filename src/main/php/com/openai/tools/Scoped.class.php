@@ -19,8 +19,8 @@ abstract class Scoped extends Definitions {
   }
 
   /** @param com.openai.tools.Named|[:callable]|object $impl */
-  public function add(string $scope, $impl): self {
-    $this->tools[$scope]= $impl instanceof Named ? $impl : new Named($impl);
+  public function add(string $scope, $impl, bool $defer= false): self {
+    $this->tools[$scope]= [$impl instanceof Named ? $impl : new Named($impl), $defer];
     return $this;
   }
 
@@ -30,7 +30,7 @@ abstract class Scoped extends Definitions {
     if (empty($this->tools)) return $s.' {}';
 
     $s.= " {\n";
-    foreach ($this->tools as $scope => $definitions) {
+    foreach ($this->tools as $scope => [$definitions, $defer]) {
       $s.= "  - {$scope}\n";
       foreach ($definition->schema() as $definition) {
         $s.= "    {$definition->name}(): {$description->description}\n";

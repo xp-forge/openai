@@ -43,6 +43,23 @@ class NamespacedTest {
   }
 
   #[Test, Values(from: 'implementations')]
+  public function defer_loading($impl) {
+    $functions= (new Namespaced())->add('greetings', $impl, defer: true);
+    Assert::equals(
+      [
+        [
+          'type'          => 'namespace',
+          'name'          => 'greetings',
+          'description'   => 'Greetings',
+          'defer_loading' => true,
+          'tools'         => $this->tools(),
+        ],
+      ],
+      [...$functions->schema()]
+    );
+  }
+
+  #[Test, Values(from: 'implementations')]
   public function call($impl) {
     Assert::equals('Hello Test', (new Namespaced(['greetings' => $impl]))
       ->calls()

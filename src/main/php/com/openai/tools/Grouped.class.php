@@ -5,8 +5,8 @@ class Grouped extends Scoped {
 
   /** Returns schema for these functions */
   public function schema(): iterable {
-    foreach ($this->tools as $scope => $tools) {
-      yield from $tools->schema($scope.'_');
+    foreach ($this->tools as $scope => [$definitions, $defer]) {
+      yield from $definitions->schema($scope.'_');
     }
   }
 
@@ -16,6 +16,6 @@ class Grouped extends Scoped {
 
     // Name gets passed in as `[scope]_[function]`
     sscanf($name, "%[^_]_%[^\r]", $scope, $function);
-    return ($tools= $this->tools[$scope] ?? null) ? $tools->invocable($function, null) : null;
+    return ($tools= $this->tools[$scope] ?? null) ? $tools[0]->invocable($function, null) : null;
   }
 }
