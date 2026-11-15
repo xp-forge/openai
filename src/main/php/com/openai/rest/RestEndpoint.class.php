@@ -9,12 +9,16 @@ abstract class RestEndpoint extends ApiEndpoint {
   /** @param webservices.rest.Endpoint */
   public function __construct($endpoint) {
     $this->endpoint= $endpoint;
-    $this->endpoint->marshalling= Tools::marshalling(fn($definition) => [
-      'type'        => 'function',
-      'name'        => $definition->name,
-      'description' => $definition->description,
-      'parameters'  => $definition->input,
-    ]);
+    $this->endpoint->marshalling= Tools::marshalling(function($definition) {
+      $r= [
+        'type'        => 'function',
+        'name'        => $definition->name,
+        'description' => $definition->description,
+        'parameters'  => $definition->input,
+      ];
+      $definition->defer && $r['defer_loading']= true;
+      return $r;
+    });
     $this->rateLimit= new RateLimit();
   }
 

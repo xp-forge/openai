@@ -6,7 +6,11 @@ class Grouped extends Scoped {
   /** Returns schema for these functions */
   public function schema(): iterable {
     foreach ($this->tools as $scope => [$definitions, $defer]) {
-      yield from $definitions->schema($scope.'_');
+      foreach ($definitions->schema() as $definition) {
+        $definition->name= $scope.'_'.$definition->name;
+        $definition->defer= $defer;
+        yield $definition;
+      }
     }
   }
 

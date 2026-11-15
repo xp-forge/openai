@@ -3,17 +3,21 @@
 /** @test com.openai.unittest.NamespacedTest */
 class Namespaced extends Scoped {
 
-  /** Returns schema for these functions */
+  /** Returns schema for these functions, inheriting the `defer` switch */
   public function schema(): iterable {
     foreach ($this->tools as $namespace => [$definitions, $defer]) {
-      $definition= [
+      $tools= [];
+      foreach ($definitions->schema() as $definition) {
+        $definition->defer= $defer;
+        $tools[]= $definition;
+      }
+
+      yield [
         'type'        => 'namespace',
         'name'        => $namespace,
         'description' => $definitions->description ?? ucfirst($namespace),
-        'tools'       => [...$definitions->schema()],
+        'tools'       => $tools,
       ];
-      $defer && $definition['defer_loading']= true;
-      yield $definition;
     }
   }
 

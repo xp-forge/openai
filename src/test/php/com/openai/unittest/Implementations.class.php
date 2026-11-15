@@ -19,14 +19,17 @@ trait Implementations {
     }];
   }
 
-  private function tools($group= '') {
+  private function tools($group= '', $defer= false) {
     $prefix= $group ? $group.'_' : '';
-    return [
-      new Definition($prefix.'hello', 'Says hello', [
+    return [new Definition(
+      $prefix.'hello',
+      'Says hello',
+      [
         'type'       => 'object',
         'properties' => ['name' => ['type' => 'string', 'description' => 'Name']],
         'required'   => ['name'],
-      ]),
-    ];
+      ],
+      $defer
+    )];
   }
 }

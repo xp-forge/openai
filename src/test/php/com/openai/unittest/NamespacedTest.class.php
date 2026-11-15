@@ -51,8 +51,7 @@ class NamespacedTest {
           'type'          => 'namespace',
           'name'          => 'greetings',
           'description'   => 'Greetings',
-          'defer_loading' => true,
-          'tools'         => $this->tools(),
+          'tools'         => $this->tools(defer: true),
         ],
       ],
       [...$functions->schema()]

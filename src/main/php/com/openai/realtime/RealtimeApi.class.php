@@ -40,12 +40,16 @@ class RealtimeApi implements Traceable, Value {
       $this->ws= new WebSocket($endpoint);
     }
 
-    $this->marshalling= Tools::marshalling(fn($definition) => [
-      'type'        => 'function',
-      'name'        => $definition->name,
-      'description' => $definition->description,
-      'parameters'  => $definition->input,
-    ]);
+    $this->marshalling= Tools::marshalling(function($definition) {
+      $r= [
+        'type'        => 'function',
+        'name'        => $definition->name,
+        'description' => $definition->description,
+        'parameters'  => $definition->input,
+      ];
+      $definition->defer && $r['defer_loading']= true;
+      return $r;
+    });
   }
 
   /** @return string */

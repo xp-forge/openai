@@ -29,7 +29,7 @@ class Named extends Definitions {
   }
 
   /** Returns schema for these functions */
-  public function schema($prefix= ''): iterable {
+  public function schema(): iterable {
     foreach ($this->functions as $name => [$target, $instance]) {
       $properties= $required= [];
       foreach ($target->parameters() as $param => $reflect) {
@@ -44,7 +44,7 @@ class Named extends Definitions {
       }
 
       yield new Definition(
-        $prefix.$name,
+        $name,
         $target->comment() ?? null,
         [
           'type'        => 'object',
