@@ -29,7 +29,7 @@ class Encoding extends Enum {
         '<|endoftext|>'   => 100257,
         '<|fim_prefix|>'  => 100258,
         '<|fim_middle|>'  => 100259,
-        '<|fim_middle|>'  => 100260,
+        '<|fim_suffix|>'  => 100260,
         '<|endofprompt|>' => 100276,
       ],
     ],
