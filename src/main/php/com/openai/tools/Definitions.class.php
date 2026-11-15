@@ -15,4 +15,7 @@ abstract class Definitions implements Value {
 
   /** @return ?lang.reflection.Invocable */
   public abstract function invocable(string $name, ?string $namespace= null);
+
+  /** @return string */
+  public function toString() { return nameof($this); }
 }
