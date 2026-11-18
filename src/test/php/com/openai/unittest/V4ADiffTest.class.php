@@ -67,6 +67,41 @@ class V4ADiffTest {
   }
 
   #[Test]
+  public function missing_anchor_stops_applying() {
+    $diff= new V4ADiff([
+      ['type' => 'anchor', 'value' => 'Missing'],
+      ['type' => 'add',    'value' => 'not added'],
+    ]);
+    $outcome= $this->outcome($diff->apply("first\nsecond"));
+
+    Assert::equals(['first', 'second'], $outcome[true]);
+    Assert::equals(1, sizeof($outcome[false]));
+  }
+
+  #[Test]
+  public function mismatched_delete_stops_applying() {
+    $diff= new V4ADiff([
+      ['type' => 'delete', 'value' => 'expected'],
+      ['type' => 'add',    'value' => 'not added'],
+    ]);
+    $outcome= $this->outcome($diff->apply('actual'));
+
+    Assert::equals([], $outcome[true]);
+    Assert::equals(['Cannot delete `expected` at line 1, have `actual`'], $outcome[false]);
+  }
+
+  #[Test]
+  public function yields_remaining_source_lines_once() {
+    $diff= new V4ADiff([
+      ['type' => 'keep', 'value' => 'first'],
+    ]);
+    $outcome= $this->outcome($diff->apply("first\nsecond\nthird"));
+
+    Assert::equals([], $outcome[false]);
+    Assert::equals(['first', 'second', 'third'], $outcome[true]);
+  }
+
+  #[Test]
   public function parse_edits() {
     Assert::equals(
       [

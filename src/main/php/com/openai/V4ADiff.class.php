@@ -61,8 +61,8 @@ class V4ADiff {
             if (0 === strncmp($line, $anchor, strlen($anchor))) break 2;
           }
 
-          yield false => 'Canot find anchor `'.$anchor.'` at line '.$lines->key();
-          break;
+          yield false => 'Cannot find anchor `'.$anchor.'` at line '.$lines->key();
+          return;
 
         case 'add':
           yield true => $instruction['value'];
@@ -71,7 +71,7 @@ class V4ADiff {
         case 'delete':
           if ($line !== $instruction['value']) {
             yield false => 'Cannot delete `'.$instruction['value'].'` at line '.$lines->key().', have `'.$line.'`';
-            break;
+            return;
           }
 
           $lines->next();
@@ -92,6 +92,7 @@ class V4ADiff {
     // Yield rest of file
     while ($lines->valid()) {
       yield true => $lines->current();
+      $lines->next();
     }
   }
 }
