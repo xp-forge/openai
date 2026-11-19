@@ -1,6 +1,6 @@
 <?php namespace com\openai\unittest;
 
-use com\openai\v4a\Patch;
+use com\openai\v4a\{Patch, Operation};
 use lang\FormatException;
 use test\{Assert, Expect, Test, Values};
 
@@ -14,16 +14,28 @@ class PatchTest {
   #[Test]
   public function simple_operations() {
     Assert::equals(
-      [
-        ['type' => 'update', 'path' => null, 'hunks' => [
-          ['anchors' => [], 'end' => false, 'instructions' => [
-            ['type' => 'keep', 'value' => 'Hello'],
-            ['type' => 'delete', 'value' => 'world'],
-            ['type' => 'add', 'value' => 'everyone'],
-          ]],
-        ]]
-      ],
+      [new Operation('update', null, [
+        ['anchors' => [], 'end' => false, 'instructions' => [
+          ['type' => 'keep', 'value' => 'Hello'],
+          ['type' => 'delete', 'value' => 'world'],
+          ['type' => 'add', 'value' => 'everyone'],
+        ]],
+      ])],
       Patch::operations(" Hello\n-world\n+everyone")
+    );
+  }
+
+  #[Test]
+  public function bare_lines_are_empty_context() {
+    Assert::equals(
+      [new Operation('update', null, [
+        ['anchors' => [], 'end' => false, 'instructions' => [
+          ['type' => 'delete', 'value' => 'first'],
+          ['type' => 'keep', 'value' => ''],
+          ['type' => 'add', 'value' => 'second'],
+        ],],
+      ])],
+      Patch::operations("-first\n\n+second")
     );
   }
 
@@ -33,14 +45,29 @@ class PatchTest {
   ])]
   public function anchored($input, $expected) {
     Assert::equals(
-      [
-        ['type' => 'update', 'path' => null, 'hunks' => [
-          ['anchors' => $expected, 'end' => false, 'instructions' => [
-            ['type' => 'add', 'value' => 'new'],
-          ]],
-        ]]
-      ],
+      [new Operation('update', null, [
+        ['anchors' => $expected, 'end' => false, 'instructions' => [
+          ['type' => 'add', 'value' => 'new'],
+        ]],
+      ])],
       Patch::operations($input)
+    );
+  }
+
+  #[Test]
+  public function hunk_after_end_of_file() {
+    Assert::equals(
+      [new Operation('update', null, [
+        ['anchors' => ['last'], 'end' => true, 'instructions' => [
+          ['type' => 'delete', 'value' => 'old'],
+          ['type' => 'add', 'value' => 'new'],
+        ]],
+        ['anchors' => ['next'], 'end' => false, 'instructions' => [
+          ['type' => 'delete', 'value' => 'before'],
+          ['type' => 'add', 'value' => 'after'],
+        ]],
+      ])],
+      Patch::operations("@@ last\n-old\n+new\n*** End of File\n\n@@ next\n-before\n+after")
     );
   }
 
@@ -56,15 +83,13 @@ class PatchTest {
       DIFF
     );
     Assert::equals(
-      [
-        ['type' => 'update', 'path' => 'example.txt', 'hunks' => [
-          ['anchors' => [], 'end' => false, 'instructions' => [
-            ['type' => 'keep', 'value' => 'Hello'],
-            ['type' => 'delete', 'value' => 'world'],
-            ['type' => 'add', 'value' => 'everyone'],
-          ]],
-        ]]
-      ],
+      [new Operation('update', 'example.txt', [
+        ['anchors' => [], 'end' => false, 'instructions' => [
+          ['type' => 'keep', 'value' => 'Hello'],
+          ['type' => 'delete', 'value' => 'world'],
+          ['type' => 'add', 'value' => 'everyone'],
+        ]],
+      ])],
       $patch->operations
     );
   }
@@ -80,14 +105,11 @@ class PatchTest {
       DIFF
     );
     Assert::equals(
-      [
-        ['type' => 'delete', 'path' => 'example.txt', 'hunks' => []],
-        ['type' => 'add', 'path' => 'test.txt', 'hunks' => [
-          ['anchors' => [], 'end' => false, 'instructions' => [
-            ['type' => 'add', 'value' => 'Test'],
-          ]],
-        ]]
-      ],
+      [new Operation('delete', 'example.txt'), new Operation('add', 'test.txt', [
+        ['anchors' => [], 'end' => false, 'instructions' => [
+          ['type' => 'add', 'value' => 'Test'],
+        ]],
+      ])],
       $patch->operations
     );
   }
@@ -105,14 +127,12 @@ class PatchTest {
       DIFF
     );
     Assert::equals(
-      [
-        ['type' => 'update', 'path' => 'src/old.txt', 'target' => 'src/new.txt', 'hunks' => [
-          ['anchors' => [''], 'end' => false, 'instructions' => [
-            ['type' => 'delete', 'value' => 'Hello, world!'],
-            ['type' => 'add', 'value' => 'Hello, everyone!'],
-          ]],
-        ]]
-      ],
+      [new Operation('update', ['src/old.txt' => 'src/new.txt'], [
+        ['anchors' => [''], 'end' => false, 'instructions' => [
+          ['type' => 'delete', 'value' => 'Hello, world!'],
+          ['type' => 'add', 'value' => 'Hello, everyone!'],
+        ]],
+      ])],
       $patch->operations
     );
   }
@@ -130,14 +150,12 @@ class PatchTest {
       DIFF
     );
     Assert::equals(
-      [
-        ['type' => 'update', 'path' => 'example.txt', 'hunks' => [
-          ['anchors' => [''], 'end' => true, 'instructions' => [
-            ['type' => 'keep', 'value' => 'end'],
-            ['type' => 'add', 'value' => 'new last line'],
-          ]],
-        ]]
-      ],
+      [new Operation('update', 'example.txt', [
+        ['anchors' => [''], 'end' => true, 'instructions' => [
+          ['type' => 'keep', 'value' => 'end'],
+          ['type' => 'add', 'value' => 'new last line'],
+        ]],
+      ])],
       $patch->operations
     );
   }
@@ -163,7 +181,7 @@ class PatchTest {
     );
     Assert::equals(
       [
-        ['type' => 'update', 'path' => 'example.txt', 'hunks' => [
+        new Operation('update', 'example.txt', [
           ['anchors' => ['class Example', '  function run() {'], 'end' => false, 'instructions' => [
             ['type' => 'delete', 'value' => 'old'],
             ['type' => 'add', 'value' => 'new'],
@@ -172,52 +190,15 @@ class PatchTest {
             ['type' => 'keep', 'value' => 'context'],
             ['type' => 'add', 'value' => 'added'],
           ]],
-        ]],
-        ['type' => 'update', 'path' => 'other.txt', 'hunks' => [
+        ]),
+        new Operation('update', 'other.txt', [
           ['anchors' => [], 'end' => false, 'instructions' => [
             ['type' => 'delete', 'value' => 'before'],
             ['type' => 'add', 'value' => 'after'],
           ]],
-        ]],
+        ]),
       ],
       $patch->operations
-    );
-  }
-
-  #[Test]
-  public function bare_lines_are_empty_context() {
-    $patch= new Patch("-first\n\n+second");
-    Assert::equals(
-      [['type' => 'update', 'path' => null, 'hunks' => [
-        ['anchors' => [], 'end' => false, 'instructions' => [
-          ['type' => 'delete', 'value' => 'first'],
-          ['type' => 'keep', 'value' => ''],
-          ['type' => 'add', 'value' => 'second'],
-        ],],
-      ]]],
-      $patch->operations
-    );
-  }
-
-  #[Test, Values([false, true])]
-  public function hunk_after_end_of_file($enveloped) {
-    $diff= "@@ last\n-old\n+new\n*** End of File\n\n@@ next\n-before\n+after";
-    if ($enveloped) {
-      $diff= "*** Begin Patch\n*** Update File: example.txt\n".$diff."\n*** End Patch";
-    }
-
-    Assert::equals(
-      [['type' => 'update', 'path' => $enveloped ? 'example.txt' : null, 'hunks' => [
-        ['anchors' => ['last'], 'end' => true, 'instructions' => [
-          ['type' => 'delete', 'value' => 'old'],
-          ['type' => 'add', 'value' => 'new'],
-        ]],
-        ['anchors' => ['next'], 'end' => false, 'instructions' => [
-          ['type' => 'delete', 'value' => 'before'],
-          ['type' => 'add', 'value' => 'after'],
-        ]],
-      ]]],
-      Patch::operations($diff)
     );
   }
 

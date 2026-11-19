@@ -17,6 +17,7 @@ class Patch {
    * as input consisting only of hunks as passed by the Agent SDK.
    *
    * @param  io.streams.Reader|io.streams.InputStream|io.Channel|string $input
+   * @return com.openai.Operation[]
    * @throws lang.FormatException for unexpected content
    */
   public static function operations($input, string $type= 'update'): array {
@@ -31,7 +32,7 @@ class Patch {
       if ('*** End Patch' === $it->current()) return $operations;
     } else {
       $hunks= self::hunks($it);
-      if (null === $it->current()) return [['type' => $type, 'path' => null, 'hunks' => $hunks]];
+      if (null === $it->current()) return [new Operation($type, null, $hunks)];
     }
 
     // Unexpected end of parsing
@@ -108,7 +109,7 @@ class Patch {
         'delete file' => 'delete',
         default => throw new FormatException("Unknown operation `{$operation}`")
       };
-      $operation= ['type' => $type, 'path' => $path];
+      $operation= new Operation($type, $path);
       $it->next();
 
       // Check for `Move to` for `updates`.
@@ -118,12 +119,12 @@ class Patch {
           throw new FormatException('`Move to` only allowed for update operations');
         }
 
-        $operation['target']= substr($line, 13);
+        $operation->target= substr($line, 13);
         $it->next();
       }
 
       // Read hunks until the next operation is encountered
-      $operation['hunks']= self::hunks($it);
+      $operation->hunks= self::hunks($it);
       $operations[]= $operation;
     }
 
