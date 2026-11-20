@@ -8,7 +8,7 @@ abstract class Scoped extends Definitions {
   public function __construct($arg= []) {
     if (is_array($arg)) {
       foreach ($arg as $scope => $impl) {
-        $this->add($scope, $impl);  
+        $this->add($scope, $impl);
       }
     } else {
 
