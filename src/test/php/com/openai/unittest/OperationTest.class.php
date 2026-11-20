@@ -1,7 +1,8 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\v4a\Operation;
-use test\{Assert, Test};
+use lang\IllegalStateException;
+use test\{Assert, Expect, Test};
 
 class OperationTest {
 
@@ -29,10 +30,10 @@ class OperationTest {
   public function change_sub_to_add() {
     $fixture= new Operation('add', null, [
       ['anchors' => [], 'end' => false, 'instructions' => [
-        ['type' => 'keep',   'value' => 'function(a, b) {'],
+        ['type' => 'keep', 'value' => 'function(a, b) {'],
         ['type' => 'delete', 'value' => '  return a - b'],
-        ['type' => 'add',    'value' => '  return a + b'],
-        ['type' => 'keep',   'value' => '}'],
+        ['type' => 'add', 'value' => '  return a + b'],
+        ['type' => 'keep', 'value' => '}'],
       ]]
     ]);
 
@@ -44,11 +45,11 @@ class OperationTest {
 
   #[Test]
   public function find_anchor() {
-    $fixture= new Operation('add', null, [
+    $fixture= new Operation('update', null, [
       ['anchors' => ['Always'], 'end' => false, 'instructions' => [
-        ['type' => 'keep',   'value' => '- Ask'],
+        ['type' => 'keep', 'value' => '- Ask'],
         ['type' => 'delete', 'value' => '- Ask'],
-        ['type' => 'add',    'value' => '- Help'],
+        ['type' => 'add', 'value' => '- Help'],
       ]]
     ]);
 
@@ -63,5 +64,40 @@ class OperationTest {
         MARKDOWN
       )]
     );
+  }
+
+  #[Test]
+  public function yields_remaining_source_lines_once() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => [], 'end' => false, 'instructions' => [
+        ['type' => 'keep', 'value' => 'first'],
+      ]]
+    ]);
+
+    Assert::equals(
+      ['first', 'second', 'third'],
+      [...$fixture->apply("first\nsecond\nthird")]
+    );
+  }
+
+  #[Test, Expect(class: IllegalStateException::class, message: 'Cannot locate anchors [`Missing`]')]
+  public function missing_anchor_stops_applying() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => ['Missing'], 'end' => false, 'instructions' => [
+        ['type' => 'add', 'value' => 'not added'],
+      ]]
+    ]);
+    [...$fixture->apply("first\nsecond")];
+  }
+
+  #[Test, Expect(class: IllegalStateException::class, message: 'Cannot delete `expected` at line 1, have `actual`')]
+  public function mismatched_delete_stops_applying() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => [], 'end' => false, 'instructions' => [
+        ['type' => 'delete', 'value' => 'expected'],
+        ['type' => 'add', 'value' => 'not added'],
+      ]]
+    ]);
+    [...$fixture->apply('actual')];
   }
 }
