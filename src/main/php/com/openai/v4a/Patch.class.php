@@ -1,6 +1,6 @@
 <?php namespace com\openai\v4a;
 
-use io\streams\LinesIn;
+use io\streams\StringReader;
 use lang\{FormatException, IllegalStateException};
 
 /** @test com.openai.unittest.PatchTest */
@@ -114,10 +114,14 @@ class Patch {
    * @throws lang.FormatException for unexpected content
    */
   public static function operations($input, string $type= 'update'): array {
-    $lines= $input instanceof LinesIn ? $input : new LinesIn($input);
+    $reader= new StringReader($input);
+    $it= (function() use($reader) {
+      while (null !== ($line= $reader->readLine())) {
+        yield $line;
+      }
+    })();
 
     // Check for an envelope
-    $it= $lines->getIterator();
     $first= $it->current();
     if ('*** Begin Patch' === $first) {
       $it->next();
