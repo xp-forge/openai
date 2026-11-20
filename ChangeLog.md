@@ -3,6 +3,10 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+* Merged PR #30: Add V4A diff to support the `apply_patch` tool, see
+  https://developers.openai.com/api/docs/guides/tools-apply-patch
+  (@thekid)
+
 ## 1.2.0 / 2026-11-20
 
 * Merged PR #28: Add support for namespaces in function calling, see
