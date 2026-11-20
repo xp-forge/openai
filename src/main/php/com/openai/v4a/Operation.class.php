@@ -29,18 +29,14 @@ class Operation {
 
     foreach ($this->hunks as $hunk) {
 
-      // Search for anchors
-      if (empty($hunk['anchors'])) {
-        // TODO
-      } else {
+      // Search forwards until all anchors have been found
+      foreach ($hunk['anchors'] as $anchor) {
         while ($lines->valid()) {
           $line= $lines->current();
           yield $line;
 
           $lines->next();
-          foreach ($hunk['anchors'] as $anchor) {
-            if (0 === strncmp($line, $anchor, strlen($anchor))) goto apply;
-          }
+          if (0 === strncmp($line, $anchor, strlen($anchor))) continue 2;
         }
 
         throw new IllegalStateException('Cannot locate anchors [`'.implode('`, `', $hunk['anchors']).'`]');

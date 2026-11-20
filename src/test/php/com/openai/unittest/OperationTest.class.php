@@ -46,7 +46,7 @@ class OperationTest {
   #[Test]
   public function find_anchor() {
     $fixture= new Operation('update', null, [
-      ['anchors' => ['Always'], 'end' => false, 'instructions' => [
+      ['anchors' => ['Always do the following:'], 'end' => false, 'instructions' => [
         ['type' => 'keep', 'value' => '- Ask'],
         ['type' => 'delete', 'value' => '- Ask'],
         ['type' => 'add', 'value' => '- Help'],
@@ -62,6 +62,30 @@ class OperationTest {
         - Ask
         - Ask
         MARKDOWN
+      )]
+    );
+  }
+
+  #[Test]
+  public function find_anchors() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => ['class T {', '  create() {'], 'end' => false, 'instructions' => [
+        ['type' => 'delete', 'value' => ''],
+        ['type' => 'add', 'value' => '    console.log("Hello");'],
+      ]]
+    ]);
+
+    Assert::equals(
+      ['class T {', '  #name = "Test";', '', '  create() {', '    console.log("Hello");', '  }', '}'],
+      [...$fixture->apply(<<<'JS'
+        class T {
+          #name = "Test";
+
+          create() {
+
+          }
+        }
+        JS
       )]
     );
   }
