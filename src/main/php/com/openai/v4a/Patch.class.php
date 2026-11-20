@@ -5,9 +5,11 @@ use lang\{FormatException, IllegalStateException};
 
 /** @test com.openai.unittest.PatchTest */
 class Patch {
+
+  /** @type com.openai.v4a.Operation[] */
   public $operations;
 
-  /** @param array|io.streams.Reader|io.streams.InputStream|io.Channel|string $input */
+  /** @param array|string|io.streams.InputStream|io.Channel $input */
   public function __construct($input= []) {
     $this->operations= is_array($input) ? $input : self::operations($input);
   }
@@ -107,7 +109,7 @@ class Patch {
    * Parses operations from a given input. Supports enveloped diffs as well
    * as input consisting only of hunks as passed by the Agent SDK.
    *
-   * @param  io.streams.Reader|io.streams.InputStream|io.Channel|string $input
+   * @param  string|io.streams.InputStream|io.Channel $input
    * @return com.openai.Operation[]
    * @throws lang.FormatException for unexpected content
    */
