@@ -1,6 +1,6 @@
 <?php namespace com\openai\rest;
 
-use com\openai\tools\Functions;
+use com\openai\tools\Tools;
 use webservices\rest\{RestResource, RestResponse, RestUpload, UnexpectedStatus};
 
 /** @see https://platform.openai.com/docs/guides/responses-vs-chat-completions */
@@ -19,24 +19,17 @@ class Api {
     // In the legacy completions API, streaming requires an option to include usage and tools
     // are formatted in a substructure, see https://github.com/xp-forge/openai/issues/20
     if (0 === substr_compare($resource->uri()->path(), '/completions', -12)) {
-      $structure= function($tools) {
-        foreach ($tools->selection as $select) {
-          if ($select instanceof Functions) {
-            foreach ($select->schema() as $name => $function) {
-              yield ['type' => 'function', 'function' => [
-                'name'        => $name,
-                'description' => $function['description'],
-                'parameters'  => $function['input'],
-              ]];
-            }
-          } else {
-            yield $select;
-          }
-        }
-      };
-      $this->adapt= function($payload) use($structure) {
+      $tools= Tools::marshalling(fn($definition) => [
+        'type'     => 'function',
+        'function' => [
+          'name'        => $definition->name,
+          'description' => $definition->description,
+          'parameters'  => $definition->input,
+        ]
+      ]);
+      $this->adapt= function($payload) use($tools) {
         if ($payload['stream'] ?? null) $payload['stream_options']= ['include_usage' => true];
-        if ($payload['tools'] ?? null) $payload['tools']= [...$structure($payload['tools'])];
+        if ($payload['tools'] ?? null) $payload['tools']= $tools->marshal($payload['tools']);
         return $payload;
       };
     }
