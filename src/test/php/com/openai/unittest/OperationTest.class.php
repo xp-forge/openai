@@ -114,7 +114,7 @@ class OperationTest {
     [...$fixture->apply("first\nsecond")];
   }
 
-  #[Test, Expect(class: IllegalStateException::class, message: 'Cannot delete `expected` at line 1, have `actual`')]
+  #[Test, Expect(class: IllegalStateException::class, message: 'Cannot delete `expected`, have `actual`')]
   public function mismatched_delete_stops_applying() {
     $fixture= new Operation('update', null, [
       ['anchors' => [], 'end' => false, 'instructions' => [

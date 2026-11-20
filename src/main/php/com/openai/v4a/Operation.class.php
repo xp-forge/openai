@@ -27,23 +27,33 @@ class Operation {
   public function apply($source) {
     $lines= $source instanceof LinesIn ? $source->getIterator() : (new LinesIn($source))->getIterator();
 
+    // Search forwards until all anchors have been found, trying equality
+    // as well as whitespace-trimmed equality.
+    $search= function($search) use($lines) {
+      while ($lines->valid()) {
+        $line= $lines->current();
+        if ($line === $search || trim($line) === trim($search)) return;
+
+        yield $line;
+        $lines->next();
+      }
+    };
+
     foreach ($this->hunks as $hunk) {
-
-      // Search forwards until all anchors have been found
       foreach ($hunk['anchors'] as $anchor) {
-        while ($lines->valid()) {
-          $line= $lines->current();
-          yield $line;
+        yield from $search($anchor);
 
-          $lines->next();
-          if (0 === strncmp($line, $anchor, strlen($anchor))) continue 2;
+        if (!$lines->valid()) {
+          throw new IllegalStateException('Cannot locate anchors [`'.implode('`, `', $hunk['anchors']).'`]');
         }
 
-        throw new IllegalStateException('Cannot locate anchors [`'.implode('`, `', $hunk['anchors']).'`]');
+        // Yield the anchor line itself
+        yield $lines->current();
+        $lines->next();
       }
 
       // Apply instructions
-      apply: foreach ($hunk['instructions'] as $instruction) {
+      foreach ($hunk['instructions'] as $instruction) {
         $line= $lines->current();
         switch ($instruction['type']) {
           case 'add':
@@ -51,21 +61,22 @@ class Operation {
             break;
 
           case 'delete':
-            if ($line !== $instruction['value']) {
-              throw new IllegalStateException("Cannot delete `{$instruction['value']}` at line {$lines->key()}, have `{$line}`");
+            yield from $search($instruction['value']);
+            if (!$lines->valid()) {
+              throw new IllegalStateException("Cannot delete `{$instruction['value']}`, have `{$line}`");
             }
 
             $lines->next();
             break;
 
           case 'keep':
-            if ($line !== $instruction['value']) {
-              throw new IllegalStateException("Cannot keep `{$instruction['value']}` at line {$lines->key()}, have `{$line}`");
-              return;
+            yield from $search($instruction['value']);
+            if (!$lines->valid()) {
+              throw new IllegalStateException("Cannot keep `{$instruction['value']}`, have `{$line}`");
             }
 
+            yield $lines->current();
             $lines->next();
-            yield $line;
             break;
         }
       }
