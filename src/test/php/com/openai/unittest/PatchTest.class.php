@@ -1,24 +1,37 @@
 <?php namespace com\openai\unittest;
 
 use com\openai\v4a\{Patch, Operation};
-use lang\FormatException;
+use lang\{FormatException, IllegalStateException};
 use test\{Assert, Expect, Test, Values};
 
 class PatchTest {
+
+  /** @return iterable */
+  private function operations() {
+    yield [[]];
+    yield [[new Operation('delete', 'test.txt', [])]];
+    yield [[new Operation('delete', 'a', []), new Operation('delete', 'b', [])]];
+  }
 
   #[Test]
   public function can_create() {
     new Patch([]);
   }
 
-  #[Test]
-  public function size_by_default() {
-    Assert::equals(0, (new Patch([]))->size());
+  #[Test, Values(from: 'operations')]
+  public function sizeof($operations) {
+    Assert::equals(sizeof($operations), (new Patch($operations))->size());
   }
 
   #[Test]
-  public function size_with_delete() {
-    Assert::equals(1, (new Patch([new Operation('delete', 'test.txt', [])]))->size());
+  public function single() {
+    $operation= new Operation('delete', 'test.txt', []);
+    Assert::equals($operation, (new Patch([$operation]))->single());
+  }
+
+  #[Test, Expect(IllegalStateException::class)]
+  public function single_when_empty() {
+    (new Patch([]))->single();
   }
 
   #[Test]

@@ -1,7 +1,7 @@
 <?php namespace com\openai\v4a;
 
 use io\streams\LinesIn;
-use lang\FormatException;
+use lang\{FormatException, IllegalStateException};
 
 /** @test com.openai.unittest.PatchTest */
 class Patch {
@@ -133,4 +133,15 @@ class Patch {
   /** Returns the number of operations in this patch */
   public function size(): int { return sizeof($this->operations); }
 
+  /**
+   * Returns the only operation, throwing an exception if there is
+   * not exactly 1 operation.
+   *
+   * @throws lang.IllegalStateException
+   */
+  public function single(): Operation {
+    if (1 === sizeof($this->operations)) return $this->operations[0];
+
+    throw new IllegalStateException('Unexpected number of operations: '.sizeof($this->operations));
+  }
 }
