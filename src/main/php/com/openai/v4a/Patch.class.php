@@ -45,7 +45,6 @@ class Patch {
 
     $ptr= $hunk;
     $hunks= [];
-    $afterEnd= false;
     while ($it->valid()) {
       $line= $it->current();
 

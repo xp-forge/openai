@@ -91,6 +91,61 @@ class OperationTest {
   }
 
   #[Test]
+  public function anchors_are_ordered_and_may_have_unrelated_lines_between_them() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => ['first', 'second'], 'end' => false, 'instructions' => [
+        ['type' => 'add', 'value' => 'added'],
+      ]]
+    ]);
+
+    Assert::equals(
+      ['first', 'unrelated', 'second', 'added'],
+      [...$fixture->apply("first\nunrelated\nsecond")]
+    );
+  }
+
+  #[Test]
+  public function exact_context_is_preferred_over_an_earlier_trimmed_match() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => [], 'end' => false, 'instructions' => [
+        ['type' => 'delete', 'value' => 'line'],
+        ['type' => 'add', 'value' => 'replacement'],
+      ]]
+    ]);
+
+    Assert::equals(
+      ['  line', 'replacement'],
+      [...$fixture->apply("  line\nline")]
+    );
+  }
+
+  #[Test]
+  public function end_of_file_hunk_uses_last_context_match() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => [], 'end' => true, 'instructions' => [
+        ['type' => 'keep', 'value' => 'duplicate'],
+        ['type' => 'add', 'value' => 'last'],
+      ]]
+    ]);
+
+    Assert::equals(
+      ['duplicate', 'middle', 'duplicate', 'last'],
+      [...$fixture->apply("duplicate\nmiddle\nduplicate")]
+    );
+  }
+
+  #[Test]
+  public function eof_hunk_adds_after_current_eof_when_context_is_empty() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => [], 'end' => true, 'instructions' => [
+        ['type' => 'add', 'value' => 'last'],
+      ]]
+    ]);
+
+    Assert::equals(['first', 'last'], [...$fixture->apply('first')]);
+  }
+
+  #[Test]
   public function find_empty_anchor() {
     $fixture= new Operation('update', null, [
       ['anchors' => [''], 'end' => false, 'instructions' => [
