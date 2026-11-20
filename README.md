@@ -386,7 +386,13 @@ use util\cmd\Console;
 $patch= new Patch($diff);
 foreach ($patch->operations as $operation) {
   Console::writeLine($operation->type, ' ', $operation->path);
-  Console::writeLine(implode("\n", $operation->apply('')));
+  switch ($operation->type) {
+    case 'add':
+      Console::writeLine(implode("\n", $operation->apply([])))
+      break;
+
+    // TODO: Handle `update` and `delete`
+  }
 }
 ```
 
