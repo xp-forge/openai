@@ -91,6 +91,18 @@ class OperationTest {
   }
 
   #[Test]
+  public function find_empty_anchor() {
+    $fixture= new Operation('update', null, [
+      ['anchors' => [''], 'end' => false, 'instructions' => [
+        ['type' => 'delete', 'value' => 'Old'],
+        ['type' => 'add', 'value' => 'New'],
+      ]]
+    ]);
+
+    Assert::equals(['New'], [...$fixture->apply('Old')]);
+  }
+
+  #[Test]
   public function yields_remaining_source_lines_once() {
     $fixture= new Operation('update', null, [
       ['anchors' => [], 'end' => false, 'instructions' => [

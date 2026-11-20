@@ -41,6 +41,8 @@ class Operation {
 
     foreach ($this->hunks as $hunk) {
       foreach ($hunk['anchors'] as $anchor) {
+        if ('' === $anchor) continue;
+
         yield from $search($anchor);
 
         if (!$lines->valid()) {
