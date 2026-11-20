@@ -12,33 +12,6 @@ class Patch {
     $this->operations= is_array($input) ? $input : self::operations($input);
   }
 
-  /**
-   * Parses operations from a given input. Supports enveloped diffs as well
-   * as input consisting only of hunks as passed by the Agent SDK.
-   *
-   * @param  io.streams.Reader|io.streams.InputStream|io.Channel|string $input
-   * @return com.openai.Operation[]
-   * @throws lang.FormatException for unexpected content
-   */
-  public static function operations($input, string $type= 'update'): array {
-    $lines= $input instanceof LinesIn ? $input : new LinesIn($input);
-
-    // Check for an envelope
-    $it= $lines->getIterator();
-    $first= $it->current();
-    if ('*** Begin Patch' === $first) {
-      $it->next();
-      $operations= self::envelope($it);
-      if ('*** End Patch' === $it->current()) return $operations;
-    } else {
-      $hunks= self::hunks($it);
-      if (null === $it->current()) return [new Operation($type, null, $hunks)];
-    }
-
-    // Unexpected end of parsing
-    throw new FormatException($it->valid() ? "Unexpected `{$it->current()}`" : 'Unexpected end of file');
-  }
-
   /** Parses one or more hunks */
   private static function hunks($it) {
     static $hunk= ['anchors' => [], 'end' => false, 'instructions' => []];
@@ -129,4 +102,35 @@ class Patch {
 
     return $operations;
   }
+
+  /**
+   * Parses operations from a given input. Supports enveloped diffs as well
+   * as input consisting only of hunks as passed by the Agent SDK.
+   *
+   * @param  io.streams.Reader|io.streams.InputStream|io.Channel|string $input
+   * @return com.openai.Operation[]
+   * @throws lang.FormatException for unexpected content
+   */
+  public static function operations($input, string $type= 'update'): array {
+    $lines= $input instanceof LinesIn ? $input : new LinesIn($input);
+
+    // Check for an envelope
+    $it= $lines->getIterator();
+    $first= $it->current();
+    if ('*** Begin Patch' === $first) {
+      $it->next();
+      $operations= self::envelope($it);
+      if ('*** End Patch' === $it->current()) return $operations;
+    } else {
+      $hunks= self::hunks($it);
+      if (null === $it->current()) return [new Operation($type, null, $hunks)];
+    }
+
+    // Unexpected end of parsing
+    throw new FormatException($it->valid() ? "Unexpected `{$it->current()}`" : 'Unexpected end of file');
+  }
+
+  /** Returns the number of operations in this patch */
+  public function size(): int { return sizeof($this->operations); }
+
 }

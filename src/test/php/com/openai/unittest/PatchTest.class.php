@@ -12,6 +12,16 @@ class PatchTest {
   }
 
   #[Test]
+  public function size_by_default() {
+    Assert::equals(0, (new Patch([]))->size());
+  }
+
+  #[Test]
+  public function size_with_delete() {
+    Assert::equals(1, (new Patch([new Operation('delete', 'test.txt', [])]))->size());
+  }
+
+  #[Test]
   public function simple_operations() {
     Assert::equals(
       [new Operation('update', null, [
