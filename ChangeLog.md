@@ -3,6 +3,12 @@ OpenAI APIs for XP ChangeLog
 
 ## ?.?.? / ????-??-??
 
+## 1.2.0 / 2026-11-20
+
+* Merged PR #28: Add support for namespaces in function calling, see
+  https://developers.openai.com/api/docs/guides/function-calling
+  (@thekid)
+
 ## 1.1.0 / 2026-11-15
 
 * Merged PR #29: Implement byte-pair merge correctly using priority queue
